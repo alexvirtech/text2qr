@@ -36,8 +36,8 @@ const MainMenu = ({ close }) => {
             <div class="overflow-y-scroll no-scrollbar max-h-[100vh] left-0 top-0 z-10 bottom-0 absolute bg-gray-800">
                 <div class="flex flex-col w-[300px] h-full">
                     <div class="flex items-center justify-between h-16 border-b border-gray-700 px-4 mb-2">
-                        <div class="text-white font-bold text-2xl">Text2QR Tools</div>
-                        <div class="text-white font-semibold cursor-pointer text-3xl" onClick={close}>
+                        <div class="text-blue-200 font-bold text-2xl">Text2QR Tools</div>
+                        <div class="text-blue-300 font-semibold cursor-pointer text-3xl" onClick={close}>
                             &times;
                         </div>
                     </div>
