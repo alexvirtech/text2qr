@@ -1,17 +1,10 @@
 import { Link } from "preact-router"
 import { useEffect, useState } from "preact/hooks"
-import { styles } from "../utils/styles" // Assuming you have your styles defined
+import { styles } from "../utils/styles"
+import { pages } from "../utils/common" 
 
 const TopMenu = () => {    
     const [activePath, setActivePath] = useState(window.location.pathname)
-
-    const links = {
-        "/": "Text to QR",
-        "/qr2text": "QR to Text",
-        "/enctext": "Encrypt Text",
-        "/dectext": "Decrypt Text",
-        "/about": "About",
-    }
 
     useEffect(() => {
         const handleRouteChange = () => {
@@ -34,10 +27,10 @@ const TopMenu = () => {
     return (
         <div class="flex justify-end gap-4">
             {
-                Object.keys(links).map((path) => (
+                Object.keys(pages).map((path) => (
                     <div>
                         <Link href={path} class={`${styles.link} ${activePath === path ? "underline underline-offset-8 decoration-4" : ""}`} onClick={() => handleLinkClick(path)}>
-                            {links[path]}
+                            {pages[path]}
                         </Link>
                     </div> 
                 ))
