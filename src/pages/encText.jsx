@@ -1,12 +1,10 @@
 import { useState, useContext, useEffect, useRef } from "preact/hooks"
 import { styles } from "../utils/styles"
 import Context from "../utils/context"
-import qrcode from "qrcode"
 import { copyText } from "../utils/lib"
 import { encrypt, decrypt } from "../utils/crypto"
-import { showPopup } from "../utils/lib"
 
-export default function Text2QR() {
+export default function EncText() {
     const { state, dispatch } = useContext(Context)
     const [created, setCreated] = useState(false)
     const [error, setError] = useState("")
@@ -16,7 +14,6 @@ export default function Text2QR() {
     const plainText = useRef("")
     const password = useRef("")
     const repPassword = useRef("")
-    const qrCodeRef = useRef(null)
 
     useEffect(() => {
         setCreated(false)
@@ -30,22 +27,6 @@ export default function Text2QR() {
             }, 5000)
         }
     }, [error])
-
-    useEffect(() => {
-        if (ciphertext) {
-            const canvas = qrCodeRef.current
-            qrcode.toCanvas(canvas, ciphertext, { width: canvas.offsetWidth, height: canvas.offsetWidth, margin: 0 })
-        }
-    }, [ciphertext])
-
-    const copyQRCodeToClipboard = () => {
-        const canvas = qrCodeRef.current
-        canvas.toBlob((blob) => {
-            const item = new ClipboardItem({ "image/png": blob })
-            navigator.clipboard.write([item])
-            showPopup("QR code copied to clipboard", canvas.getBoundingClientRect().top - 20)
-        })
-    }
 
     const validatePassword = () => {
         if (password.current.value !== repPassword.current.value) {
@@ -83,44 +64,11 @@ export default function Text2QR() {
         copyText(e, divRef, "Encrypted text")
     }
 
-    const resetQRcode = () => {
-        setText("")
-        setPassword("")
-        setCiphertext("")
-        const canvas = qrCodeRef.current
-        const context = canvas.getContext("2d")
-        context.clearRect(0, 0, canvas.width, canvas.height)
-    }
-
-    const shareCanvas = async () => {
-        const canvas = qrCodeRef.current
-        const dataUrl = canvas.toDataURL()
-        const blob = await (await fetch(dataUrl)).blob()
-        const filesArray = [
-            new File([blob], "qrcode.png", {
-                type: blob.type,
-                lastModified: new Date().getTime(),
-            }),
-        ]
-        const shareData = {
-            files: filesArray,
-        }
-
-        if (navigator.canShare && navigator.canShare(shareData)) {
-            try {
-                setCanShare(true)
-                navigator.share(shareData)
-            } catch (error) {
-                setCanShare(false)
-            }
-        }
-    }
-
     return (
-        <div class="w-full max-w-[800px] mx-auto px-8">
+        <div class="w-full max-w-[1000px] mx-auto px-8">
             <form onSubmit={(e) => validateAndExecute(e)} onReset={() => reset()}>
                 <div>
-                    <div class="text-3xl pt-4">Text to QR Code</div>
+                    <div class="text-3xl pt-4">Text Encryption</div>
                     <div class="pt-2">
                         <div class={styles.labelB}>You sensitive text</div>
                         <textarea
@@ -158,36 +106,33 @@ export default function Text2QR() {
                     </div>
                     {created && (
                         <div class="pt-2">
-                            <div class="flex justify-center gap-0">
-                                <div class="border border-blue-200 p-4 mx-8 mt-1 mb-0 cursor-pointer bg-white rounded-md">
-                                    <canvas
-                                        ref={qrCodeRef}
-                                        style={{
-                                            width: "100%",
-                                            maxWidth: "400px",
-                                            height: "auto",
-                                            padding: "0px",
-                                            margin: "0px",
-                                        }}
-                                        onClick={copyQRCodeToClipboard}
-                                        title="click to copy"
-                                    />
-                                </div>
-                            </div>
-                            <div class={styles.comments + " text-center"}>Click QR code for copy to clipboard</div>
+                            <div class={styles.labelB}>Encrypted text</div>
+                            <textarea
+                                name="text"
+                                ref={divRef}
+                                readOnly
+                                class={styles.textInput + " rounded-none"}
+                                placeholder=""
+                                rows="3"
+                                value={ciphertext}
+                                onClick={copy}
+                                title={ciphertext === "" ? "" : "Click to copy to clipboard"}
+                            ></textarea>
+                            <div class={styles.comments + " text-right"}>Click text for copy to clipboard</div>
                         </div>
                     )}
 
-                    <div class="mt-4 flex justify-center gap-2">
-                        {created ? (
-                            <button type="reset" class={styles.button}>
-                                Reset
-                            </button>
-                        ) : (
+                    <div class="mt-4 xs:flex justify-center gap-2">
+                        <div class="gap-2 sm:flex w-full pb-2">
                             <button type="submit" class={styles.button}>
                                 Encrypt
                             </button>
-                        )}
+                            {created && (
+                                <button type="reset" class={styles.button}>
+                                    Reset
+                                </button>
+                            )}
+                        </div>
                     </div>
                 </div>
             </form>

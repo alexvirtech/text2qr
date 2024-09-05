@@ -3,6 +3,7 @@ import { useState, useEffect, useReducer } from "preact/hooks"
 import Context from "./utils/context"
 import { initialState, reducer } from "./utils/reducer"
 import Router, { route } from 'preact-router'
+import EncText from "./pages/encText"
 import Text2QR from "./pages/text2qr"
 import QR2Text from "./pages/qr2text"
 import DecText from "./pages/decText"
@@ -16,8 +17,9 @@ export function App() {
         <Context.Provider value={{ state, dispatch }}>
             <Layout>
             <Router>
-                <Text2QR path="/" />               
+                <Text2QR path="/" />         
                 <QR2Text path="/qr2text" />
+                <EncText path="/enctext" />      
                 <DecText path="/dectext" />
                 <About path="/about" />
             </Router>    

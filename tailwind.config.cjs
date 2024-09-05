@@ -10,6 +10,11 @@ module.exports = {
                 landscape: { raw: "(orientation: landscape)" },
                 portrait: { raw: "(orientation: portrait)" },
             },
+            textDecorationThickness: {
+                '3': '3px',
+                '4': '4px',
+                '5': '5px', // Adjust the thickness as per your needs
+              },
             colors: {
                 'm-blue-light': {
                     '1': '#F1FAFF',
