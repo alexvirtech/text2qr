@@ -16,9 +16,7 @@ export default function Text2QR() {
     const repPassword = useRef('')
 
     useEffect(() => {
-        console.log('1',plainText.current.value)
-        console.log('2',password.current.value)
-        console.log('3',repPassword.current.value)
+        plainText.current.focus()
     }, [])
 
     useEffect(() => {
@@ -35,21 +33,18 @@ export default function Text2QR() {
         const ciphertext = encrypt(plainText.current.value, password.current.value)
         setCiphertext(ciphertext)       
         setCreated(true)
-        plainText.current.disabled = true
-        password.current.disabled = true
-        repPassword.current.disabled = true
+
     }
 
     const reset = () => {
         plainText.current.value = ''
         password.current.value = ''
-        repPassword.current.value = ''
-        plainText.current.disabled = false
-        password.current.disabled = false
-        repPassword.current.disabled = false
-        plainText.current.focus()
+        repPassword.current.value = ''                
         setCiphertext('')
         setCreated(false)        
+        setTimeout(() => {
+            plainText.current.focus()
+        },200)
     }
 
     const copy = (e) => {
@@ -60,17 +55,18 @@ export default function Text2QR() {
         <div class="w-full max-w-[1000px] mx-auto px-8">
             <form onSubmit={(e) => validateAndExecute(e)} onReset={() => reset()}>
             <div>
+                <div class="text-3xl pt-4">Text Encryption</div>
                 <div class="pt-2">
-                    <div class={styles.labelB}>Plain text</div>
-                    <textarea ref={plainText} class={styles.textInput + " rounded-none"} placeholder="Enter your sensitive text for encryption" required rows="4"></textarea>
+                    <div class={styles.labelB}>You sensitive text</div>
+                    <textarea ref={plainText} class={styles.textInput + " rounded-none"} placeholder="Enter your sensitive text for encryption" required rows="4" disabled={created}></textarea>
                 </div>
                 <div class="pt-2">
                     <div class={styles.labelB}>Password</div>
-                    <input ref={password} type="password" class={styles.textInput + " rounded-none"} placeholder="Enter password" required></input>
+                    <input ref={password} type="password" class={styles.textInput + " rounded-none"} placeholder="Enter password" required  disabled={created}></input>
                 </div>
                 <div class="pt-2">
                     <div class={styles.labelB}>Confirm Password</div>
-                    <input ref={repPassword} type="password" class={styles.textInput + " rounded-none"} placeholder="Enter password" required></input>
+                    <input ref={repPassword} type="password" class={styles.textInput + " rounded-none"} placeholder="Enter password" required  disabled={created}></input>
                 </div>
                 {created && <div class="pt-2">
                     <div class={styles.labelB}>Encrypted text</div>
