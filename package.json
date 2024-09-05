@@ -1,0 +1,26 @@
+{
+  "name": "text2qr",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "buffer": "^6.0.3",
+    "crypto-js": "^4.2.0",
+    "elliptic": "^6.5.7",
+    "preact": "^10.23.1",
+    "preact-router": "^4.1.2",
+    "tweetnacl": "^1.0.3"
+  },
+  "devDependencies": {
+    "@preact/preset-vite": "^2.9.0",
+    "autoprefixer": "^10.4.20",
+    "postcss": "^8.4.45",
+    "tailwindcss": "^3.4.10",
+    "vite": "^5.4.1"
+  }
+}
