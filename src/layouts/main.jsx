@@ -21,7 +21,7 @@ export default function Layout({ children }) {
     <Context.Provider value={{ state, dispatch }}>
       <div class="flex flex-col" style="height: calc(var(--vh) * 100)">
         <Header />
-        <div class="grow">{children}</div>
+        <div class="grow pb-4">{children}</div>
         <Footer />
       </div>
     </Context.Provider>
