@@ -4,6 +4,8 @@ import Context from "../utils/context"
 import { copyText } from "../utils/lib"
 import { encrypt, decrypt } from "../utils/crypto"
 import Error from "../components/error"
+import FileUploader from "../components/fileUploader"
+import Scanner from "../components/scanner"
 
 export default function QR2Text() {
     const { state, dispatch } = useContext(Context)
@@ -11,36 +13,23 @@ export default function QR2Text() {
     const [error, setError] = useState("")
     const [text, setText] = useState("")
     const [fromFile, setFromFile] = useState(true)
-    const [ciphertext, setCiphertext] = useState("")
+    const [password, setPassword] = useState("") // Manage password state
     const divRef = useRef(null)
 
-    const encText = useRef("")
-    const password = useRef("")
-
     useEffect(() => {
-        //
-    }, [])
+        reset()
+    }, [fromFile])
 
-    const validateAndExecute = (e) => {
-        e.preventDefault()
-        try {
-            const txt = decrypt(encText.current.value, password.current.value)
-            if (text) {
-                setText(txt)
-                setCreated(true)
-            } else {
-                reset()
-                setError("Error decrypting text")
-            }
-        } catch (e) {
-            console.error(e)
-            setError("Error - see more in dev console")
-        }
+    //const encText = useRef("")
+
+    const handleDecrypted = (decryptedText) => {
+        setText(decryptedText) // Set the decrypted text in state
+        setCreated(true)
     }
 
     const reset = () => {
         setText("")
-        password.current.value = ""
+        setPassword("") // Reset password state
         setCreated(false)
     }
 
@@ -51,43 +40,42 @@ export default function QR2Text() {
     return (
         <>
             <div class="w-full max-w-[800px] mx-auto px-8">
-                <form onSubmit={(e) => validateAndExecute(e)} onReset={() => reset()}>
+                <form onReset={() => reset()}>
                     <div>
                         <div class="flex justify-between gap-2 pt-4 h-16 items-center">
                             <div class="text-3xl">QR to Text</div>
                             <div class="">
-                                <button type="button" onClick={()=>setFromFile(true)} class={(fromFile ? styles.button : styles.buttonS) + ' rounded-r-none'}>
+                                <button
+                                    type="button"
+                                    onClick={() => setFromFile(true)}
+                                    class={(fromFile ? styles.button : styles.buttonS) + " rounded-r-none"}
+                                >
                                     From File
                                 </button>
-                                <button type="button"  onClick={()=>setFromFile(false)} class={(fromFile ? styles.buttonS : styles.button) + ' rounded-l-none'}>
+                                <button
+                                    type="button"
+                                    onClick={() => setFromFile(false)}
+                                    class={(fromFile ? styles.buttonS : styles.button) + " rounded-l-none"}
+                                >
                                     From Scan
                                 </button>
                             </div>
                         </div>
-                        {/* <div class="pt-2">
-                            <div class={styles.labelB}>Encrypted text</div>
-                            <textarea
-                                ref={encText}
-                                class={styles.textInput + " rounded-none"}
-                                rows="3"
-                                value={ciphertext}
-                                placeholder="Enter your encrypted text for decryption"
-                                required
-                            ></textarea>
-                        </div> */}
-
                         <div class="pt-2">
                             <div class={styles.labelB}>Password</div>
                             <input
-                                ref={password}
                                 type="password"
                                 class={styles.textInput + " rounded-none"}
                                 placeholder="Enter password"
                                 required
                                 disabled={created}
-                            ></input>
+                                value={password} // Bind password state to input
+                                onInput={(e) => setPassword(e.target.value)} // Update password state on change
+                            />
                         </div>
-
+                        {fromFile && !created && <FileUploader password={password} onDecrypted={handleDecrypted} />}
+                        {!fromFile && !created && <Scanner password={password} onDecrypted={handleDecrypted} />}{" "}
+                        {/* Pass password prop */}
                         {created && (
                             <div class="pt-2">
                                 <div class={styles.labelB}>Plain text</div>
@@ -104,18 +92,14 @@ export default function QR2Text() {
                                 <div class={styles.comments + " text-right"}>Click text for copy to clipboard</div>
                             </div>
                         )}
-
                         <div class="mt-4 flex justify-center gap-2">
-                            <button type="submit" class={styles.button}>
-                                Decrypt
-                            </button>
                             {created && (
                                 <button type="reset" class={styles.button}>
                                     Reset
                                 </button>
                             )}
                         </div>
-                        <Error text={error} clear={()=>setError('')}/>                        
+                        <Error text={error} clear={() => setError("")} />
                     </div>
                 </form>
             </div>
