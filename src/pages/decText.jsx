@@ -1,15 +1,9 @@
-//import { mStyles } from "../../../../utils/styles"
-//import { useState, useContext, useEffect, useRef } from "preact/hooks"
-//import Context from "../../../../utils/context"
-//import { setErrorD, copyText } from '../../../../utils/utils'
-//import { decryptText } from "../../../../utils/encdec"
-//import { decrypt } from "../../../../utils/crypto"
-
 import { useState, useContext, useEffect, useRef } from "preact/hooks"
 import { styles } from "../utils/styles"
 import Context from "../utils/context"
 import { copyText } from "../utils/lib"
 import { encrypt, decrypt } from "../utils/crypto"
+import Error from "../components/error"
 
 export default function DecText() {
     const { state, dispatch } = useContext(Context)
@@ -26,28 +20,26 @@ export default function DecText() {
         //
     }, [])
 
-    useEffect(() => {
-        if (error !== "") {
-            setTimeout(() => {
-                setError("")
-            }, 5000)
-        }
-    }, [error])
-
     const validateAndExecute = (e) => {
         e.preventDefault()
         try {
             const txt = decrypt(encText.current.value, password.current.value)
-            setText(txt)
-            setCreated(true)
+            if (text) {
+                setText(txt)
+                setCreated(true)
+            } else {
+                reset()
+                setError("Error decrypting text")
+            }
         } catch (e) {
             console.error(e)
-            setErrorD(dispatch, "error - see more in dev console")
+            setError("Error - see more in dev console")
         }
     }
 
     const reset = () => {
         setText("")
+        password.current.value = ""
         setCreated(false)
     }
 
@@ -57,7 +49,7 @@ export default function DecText() {
 
     return (
         <>
-            <div class="w-full max-w-[1000px] mx-auto px-8">
+            <div class="w-full max-w-[800px] mx-auto px-8">
                 <form onSubmit={(e) => validateAndExecute(e)} onReset={() => reset()}>
                     <div>
                         <div class="text-3xl pt-4">Text Decryption</div>
@@ -98,22 +90,21 @@ export default function DecText() {
                                     value={text}
                                     rows="3"
                                 ></textarea>
-                                  <div class={styles.comments + " text-right"}>Click text for copy to clipboard</div>
+                                <div class={styles.comments + " text-right"}>Click text for copy to clipboard</div>
                             </div>
                         )}
 
-                        <div class="mt-4 xs:flex justify-center gap-2">
-                            <div class="gap-2 sm:flex w-full pb-2">
-                                <button type="submit" class={styles.button}>
-                                    Decrypt
+                        <div class="mt-4 flex justify-center gap-2">
+                            <button type="submit" class={styles.button}>
+                                Decrypt
+                            </button>
+                            {created && (
+                                <button type="reset" class={styles.button}>
+                                    Reset
                                 </button>
-                                {created && (
-                                    <button type="reset" class={styles.button}>
-                                        Reset
-                                    </button>
-                                )}
-                            </div>
+                            )}
                         </div>
+                        <Error text={error} clear={()=>setError('')}/>                        
                     </div>
                 </form>
             </div>

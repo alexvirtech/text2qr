@@ -65,7 +65,7 @@ export default function EncText() {
     }
 
     return (
-        <div class="w-full max-w-[1000px] mx-auto px-8">
+        <div class="w-full max-w-[800px] mx-auto px-8">
             <form onSubmit={(e) => validateAndExecute(e)} onReset={() => reset()}>
                 <div>
                     <div class="text-3xl pt-4">Text Encryption</div>
@@ -79,6 +79,7 @@ export default function EncText() {
                             rows="3"
                             disabled={created}
                         ></textarea>
+                        <div class={styles.comments}>The recommended maximum length is 1000 Latin characters.</div>
                     </div>
                     <div class="pt-2">
                         <div class={styles.labelB}>Password</div>
@@ -122,17 +123,16 @@ export default function EncText() {
                         </div>
                     )}
 
-                    <div class="mt-4 xs:flex justify-center gap-2">
-                        <div class="gap-2 sm:flex w-full pb-2">
+                    <div class="mt-4 flex justify-center gap-2">
+                        {created ? (
+                            <button type="reset" class={styles.button}>
+                                Reset
+                            </button>
+                        ) : (
                             <button type="submit" class={styles.button}>
                                 Encrypt
                             </button>
-                            {created && (
-                                <button type="reset" class={styles.button}>
-                                    Reset
-                                </button>
-                            )}
-                        </div>
+                        )}
                     </div>
                 </div>
             </form>

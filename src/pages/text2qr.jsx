@@ -116,6 +116,34 @@ export default function Text2QR() {
         }
     }
 
+    const printCanvas = () => {
+        const canvas = qrCodeRef.current
+        if (canvas) {
+            const dataUrl = canvas.toDataURL() // Get the canvas content as a data URL
+            const newWindow = window.open("", "_blank") // Open a new blank window
+
+            // Write the canvas content into the new window
+            newWindow.document.write(`
+                <html>
+                    <head>
+                        <title>Print QR Code</title>
+                    </head>
+                    <body style="margin: 0; padding: 0; display: flex; justify-content: center; align-items: center;">
+                        <img src="${dataUrl}" style="width: 100%; max-width: 260px;" />
+                    </body>
+                </html>
+            `)
+
+            // Wait for the image to load before printing
+            newWindow.document.close()
+            newWindow.onload = () => {
+                newWindow.focus()
+                newWindow.print()
+                newWindow.close()
+            }
+        }
+    }
+
     return (
         <div class="w-full max-w-[800px] mx-auto px-8">
             <form onSubmit={(e) => validateAndExecute(e)} onReset={() => reset()}>
@@ -130,7 +158,9 @@ export default function Text2QR() {
                             required
                             rows="3"
                             disabled={created}
+                            maxLength="1000"
                         ></textarea>
+                         <div class={styles.comments}>The recommended maximum length is 1000 Latin characters.</div>
                     </div>
                     <div class="pt-2">
                         <div class={styles.labelB}>Password</div>
@@ -180,9 +210,14 @@ export default function Text2QR() {
 
                     <div class="mt-4 flex justify-center gap-2">
                         {created ? (
-                            <button type="reset" class={styles.button}>
-                                Reset
-                            </button>
+                             <>
+                                 <button type="button" onClick={printCanvas} class={styles.button}>
+                                    Print QR Code 
+                                </button>
+                                <button type="reset" class={styles.button}>
+                                    Reset
+                                </button>
+                             </>
                         ) : (
                             <button type="submit" class={styles.button}>
                                 Encrypt
