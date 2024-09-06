@@ -10,14 +10,15 @@ export default function Scanner({ password, onDecrypted }) {
     const [cameras, setCameras] = useState([])
     const [selectedCamera, setSelectedCamera] = useState("") // Store the selected camera
     const [qrScanner, setQrScanner] = useState(null)
+    const [cameraInitialized, setCameraInitialized] = useState(false) // Track if the camera has been initialized
 
     // Update the password ref whenever the password changes
     useEffect(() => {
         passwordRef.current = password
     }, [password])
 
+    // Fetch available cameras on mount
     useEffect(() => {
-        // Fetch available cameras
         navigator.mediaDevices.enumerateDevices().then((devices) => {
             const videoDevices = devices.filter((device) => device.kind === "videoinput")
             setCameras(videoDevices) // Set available cameras
@@ -27,14 +28,15 @@ export default function Scanner({ password, onDecrypted }) {
         })
     }, [])
 
+    // Start QR Scanner with the selected camera
     useEffect(() => {
         if (!selectedCamera || !videoRef.current) return
 
         const startScanner = async () => {
-            // Stop any previous scanner instance
+            // Stop any previous scanner instance and clean up
             if (qrScanner) {
                 await qrScanner.stop()
-                qrScanner.destroy() // Cleanup resources
+                qrScanner.destroy()
             }
 
             const newQrScanner = new QrScanner(videoRef.current, (result) => handleScanResult(result), {
@@ -42,19 +44,27 @@ export default function Scanner({ password, onDecrypted }) {
                 preferredCamera: selectedCamera, // Set the selected camera as the preferred one
             })
 
-            newQrScanner.start().catch((err) => {
-                setError(`Error starting QR scanner: ${err.message}`)
-            })
+            // Start the scanner and handle potential errors
+            newQrScanner
+                .start()
+                .then(() => {
+                    setCameraInitialized(true) // Mark camera as initialized after starting
+                })
+                .catch((err) => {
+                    setError(`Error starting QR scanner: ${err.message}`)
+                })
+
             setQrScanner(newQrScanner) // Save the scanner instance
         }
 
         startScanner()
 
-        // Cleanup the QR scanner on component unmount
+        // Cleanup the QR scanner on component unmount or when the selected camera changes
         return () => {
             if (qrScanner) {
                 qrScanner.stop()
                 qrScanner.destroy()
+                setCameraInitialized(false) // Mark camera as not initialized when cleaning up
             }
         }
     }, [selectedCamera]) // Only run when selectedCamera changes
@@ -71,6 +81,24 @@ export default function Scanner({ password, onDecrypted }) {
     const handleCameraChange = (event) => {
         setSelectedCamera(event.target.value) // Update the selected camera
     }
+
+    const forceVideoRefresh = () => {
+        if (videoRef.current) {
+            videoRef.current.srcObject = null // Clear the video element
+            setTimeout(() => {
+                if (qrScanner && cameraInitialized) {
+                    qrScanner.start() // Restart the scanner if initialized
+                }
+            }, 100) // Small delay to ensure proper re-initialization
+        }
+    }
+
+    useEffect(() => {
+        // If the camera is initialized and switching from file to scan, force refresh
+        if (cameraInitialized) {
+            forceVideoRefresh()
+        }
+    }, [cameraInitialized])
 
     return (
         <div class="pt-4 text-center">
