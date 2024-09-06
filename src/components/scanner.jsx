@@ -18,15 +18,29 @@ export default function Scanner({ password, onDecrypted }) {
         passwordRef.current = password
     }, [password])
 
-    // Fetch available cameras on mount
+    // Request camera permission on page load and fetch available cameras
     useEffect(() => {
-        navigator.mediaDevices.enumerateDevices().then((devices) => {
-            const videoDevices = devices.filter((device) => device.kind === "videoinput")
-            setCameras(videoDevices) // Set available cameras
-            if (videoDevices.length > 0) {
-                setSelectedCamera(videoDevices[0].deviceId) // Set default camera
+        async function requestCameraPermissions() {
+            try {
+                // Request permission to access the camera
+                await navigator.mediaDevices.getUserMedia({ video: true })
+                setPermissionsGranted(true) // Mark permissions as granted
+                console.log("Camera permission granted.")
+
+                // Fetch available cameras
+                const devices = await navigator.mediaDevices.enumerateDevices()
+                const videoDevices = devices.filter((device) => device.kind === "videoinput")
+                setCameras(videoDevices) // Set available cameras
+                if (videoDevices.length > 0) {
+                    setSelectedCamera(videoDevices[0].deviceId) // Set default camera
+                }
+            } catch (err) {
+                setError(`Error requesting camera permissions: ${err.message}`)
+                console.error("Error requesting camera permissions:", err)
             }
-        })
+        }
+
+        requestCameraPermissions()
     }, [])
 
     // Stop any running video stream
@@ -38,18 +52,9 @@ export default function Scanner({ password, onDecrypted }) {
         }
     }
 
-    // Function to handle permission check and video stream retry for iOS
-    const retryVideoStream = (retryCount = 0) => {
-        if (retryCount >= 3) return // Limit retries to 3 attempts
-
-        setTimeout(() => {
-            startVideoStream(true) // Attempt to reinitialize the video stream
-        }, 500 * retryCount) // Delay each retry progressively
-    }
-
     // Start the video stream with the selected camera
-    const startVideoStream = async (retry = false) => {
-        if (!selectedCamera || !videoRef.current || isSwitching) return
+    const startVideoStream = async () => {
+        if (!selectedCamera || !videoRef.current || isSwitching || !permissionsGranted) return
 
         try {
             // Stop any existing stream before starting a new one
@@ -66,16 +71,10 @@ export default function Scanner({ password, onDecrypted }) {
             videoRef.current.play() // Ensure the video is playing
 
             console.log("Started video stream with camera:", selectedCamera)
-            setPermissionsGranted(true) // Mark permissions as granted once the stream starts
             setIsSwitching(false) // Reset camera switching status
         } catch (err) {
             setError(`Error accessing camera: ${err.message}`)
             console.error("Error starting video stream:", err)
-
-            if (!retry) {
-                console.log("Retrying video stream initialization...")
-                retryVideoStream(1) // Retry initialization if it fails
-            }
         }
     }
 
@@ -94,25 +93,18 @@ export default function Scanner({ password, onDecrypted }) {
         return qrScanner
     }
 
-    // Handle the first access (iOS permission granting issue)
-    useEffect(() => {
-        if (permissionsGranted && selectedCamera) {
-            startVideoStream() // Start video stream only when permission is granted
-        }
-    }, [permissionsGranted, selectedCamera])
-
     // When the selected camera changes or the component mounts, restart the video stream
     useEffect(() => {
-        if (selectedCamera && !isSwitching) {
+        if (selectedCamera && permissionsGranted && !isSwitching) {
             console.log("Selected camera changed, restarting video stream...")
             setIsSwitching(true) // Mark as switching cameras
-            startVideoStream() // Start the video stream and allow retry if needed
+            startVideoStream() // Start the video stream
         }
 
         return () => {
             stopVideoStream() // Stop the video stream when the component unmounts
         }
-    }, [selectedCamera])
+    }, [selectedCamera, permissionsGranted])
 
     const handleScanResult = (result) => {
         try {
