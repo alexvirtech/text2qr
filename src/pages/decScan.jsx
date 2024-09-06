@@ -56,7 +56,7 @@ export default function DecScan() {
     return (
         <>
             <div class="w-full max-w-[800px] mx-auto px-8">
-                {state.encText ? (
+                {/* {state.encText ? ( */}
                     <form onSubmit={(e) => validateAndExecute(e)} onReset={() => reset()}>
                         <div>
                             <div class="text-3xl pt-4">QR to Text - From Scan</div>
@@ -112,9 +112,9 @@ export default function DecScan() {
                             <Error text={error} clear={() => setError("")} />
                         </div>
                     </form>
-                ) : (
+               {/*  ) : (
                     <div class="pt-4">No data for decryption</div>
-                )}
+                )} */}
             </div>
         </>
     )
