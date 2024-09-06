@@ -10,6 +10,7 @@ export default function Scanner({ password, onDecrypted }) {
     const [cameras, setCameras] = useState([])
     const [selectedCamera, setSelectedCamera] = useState("") // Store the selected camera
     const [stream, setStream] = useState(null) // Store the media stream
+    const [retrying, setRetrying] = useState(false) // Track retry state
 
     // Update the password ref whenever the password changes
     useEffect(() => {
@@ -36,7 +37,7 @@ export default function Scanner({ password, onDecrypted }) {
     }
 
     // Start the video stream with the selected camera
-    const startVideoStream = async () => {
+    const startVideoStream = async (retry = false) => {
         if (!selectedCamera || !videoRef.current) return
 
         try {
@@ -54,9 +55,17 @@ export default function Scanner({ password, onDecrypted }) {
             videoRef.current.play() // Ensure the video is playing
 
             console.log("Started video stream with camera:", selectedCamera)
+            setRetrying(false) // Reset retry state
         } catch (err) {
             setError(`Error accessing camera: ${err.message}`)
             console.error("Error starting video stream:", err)
+
+            // Retry initializing the stream after a short delay if it fails
+            if (!retrying && retry) {
+                setRetrying(true)
+                console.log("Retrying video stream initialization...")
+                setTimeout(() => startVideoStream(true), 500) // Retry after 500ms
+            }
         }
     }
 
@@ -79,7 +88,7 @@ export default function Scanner({ password, onDecrypted }) {
     useEffect(() => {
         if (selectedCamera) {
             console.log("Selected camera changed, restarting video stream...")
-            startVideoStream() // Start the video stream with the selected camera
+            startVideoStream(true) // Start the video stream with retry mechanism
         }
 
         return () => {
