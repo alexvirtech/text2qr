@@ -30,16 +30,21 @@ export default function Scanner({ password, onDecrypted }) {
     useEffect(() => {
         if (!selectedCamera || !videoRef.current) return
 
-        // Initialize QR Scanner with the selected camera
         const startScanner = async () => {
+            // Stop any previous scanner instance
             if (qrScanner) {
-                await qrScanner.stop() // Stop any previous scanner instance
+                await qrScanner.stop()
+                qrScanner.destroy() // Cleanup resources
             }
+
             const newQrScanner = new QrScanner(videoRef.current, (result) => handleScanResult(result), {
                 highlightScanRegion: true,
                 preferredCamera: selectedCamera, // Set the selected camera as the preferred one
             })
-            newQrScanner.start() // Start the QR scanner
+
+            newQrScanner.start().catch((err) => {
+                setError(`Error starting QR scanner: ${err.message}`)
+            })
             setQrScanner(newQrScanner) // Save the scanner instance
         }
 
@@ -49,6 +54,7 @@ export default function Scanner({ password, onDecrypted }) {
         return () => {
             if (qrScanner) {
                 qrScanner.stop()
+                qrScanner.destroy()
             }
         }
     }, [selectedCamera]) // Only run when selectedCamera changes
@@ -68,13 +74,13 @@ export default function Scanner({ password, onDecrypted }) {
 
     return (
         <div class="pt-4 text-center">
-            <video ref={videoRef} style={{ width: "100%" }}></video>
+            <video ref={videoRef} playsinline autoPlay style={{ width: "100%" }}></video>
             {error && <p class={styles.error}>{error}</p>}
 
             {/* Show camera select dropdown if more than one camera */}
             {cameras.length > 1 && (
                 <div class="mt-2">
-                    <label for="cameraSelect" class="block text-gray-700">
+                    <label htmlFor="cameraSelect" class="block text-gray-700">
                         Select Camera:
                     </label>
                     <select
