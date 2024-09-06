@@ -33,7 +33,7 @@ export default function DecScan() {
                 setText(txt)
                 setCreated(true)
             } else {
-                reset()
+                //reset()
                 setError("Error decrypting text")
             }
         } catch (e) {
