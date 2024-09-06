@@ -111,6 +111,7 @@ export default function DecScan() {
                             </div>
                             <Error text={error} clear={() => setError("")} />
                         </div>
+                        <div>received: {state.encText}</div>
                     </form>
                {/*  ) : (
                     <div class="pt-4">No data for decryption</div>
