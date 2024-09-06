@@ -10,7 +10,6 @@ export default function Scanner({ password, onDecrypted }) {
     const [cameras, setCameras] = useState([])
     const [selectedCamera, setSelectedCamera] = useState("") // Store the selected camera
     const [qrScanner, setQrScanner] = useState(null)
-    const [cameraInitialized, setCameraInitialized] = useState(false) // Track if the camera has been initialized
 
     // Update the password ref whenever the password changes
     useEffect(() => {
@@ -39,22 +38,17 @@ export default function Scanner({ password, onDecrypted }) {
                 qrScanner.destroy()
             }
 
-            const newQrScanner = new QrScanner(videoRef.current, (result) => handleScanResult(result), {
-                highlightScanRegion: true,
-                preferredCamera: selectedCamera, // Set the selected camera as the preferred one
-            })
-
-            // Start the scanner and handle potential errors
-            newQrScanner
-                .start()
-                .then(() => {
-                    setCameraInitialized(true) // Mark camera as initialized after starting
-                })
-                .catch((err) => {
-                    setError(`Error starting QR scanner: ${err.message}`)
+            try {
+                const newQrScanner = new QrScanner(videoRef.current, (result) => handleScanResult(result), {
+                    highlightScanRegion: true,
+                    preferredCamera: selectedCamera, // Set the selected camera as the preferred one
                 })
 
-            setQrScanner(newQrScanner) // Save the scanner instance
+                await newQrScanner.start() // Start the QR scanner
+                setQrScanner(newQrScanner) // Save the scanner instance
+            } catch (err) {
+                setError(`Error starting QR scanner: ${err.message}`)
+            }
         }
 
         startScanner()
@@ -64,7 +58,6 @@ export default function Scanner({ password, onDecrypted }) {
             if (qrScanner) {
                 qrScanner.stop()
                 qrScanner.destroy()
-                setCameraInitialized(false) // Mark camera as not initialized when cleaning up
             }
         }
     }, [selectedCamera]) // Only run when selectedCamera changes
@@ -82,27 +75,9 @@ export default function Scanner({ password, onDecrypted }) {
         setSelectedCamera(event.target.value) // Update the selected camera
     }
 
-    const forceVideoRefresh = () => {
-        if (videoRef.current) {
-            videoRef.current.srcObject = null // Clear the video element
-            setTimeout(() => {
-                if (qrScanner && cameraInitialized) {
-                    qrScanner.start() // Restart the scanner if initialized
-                }
-            }, 100) // Small delay to ensure proper re-initialization
-        }
-    }
-
-    useEffect(() => {
-        // If the camera is initialized and switching from file to scan, force refresh
-        if (cameraInitialized) {
-            forceVideoRefresh()
-        }
-    }, [cameraInitialized])
-
     return (
         <div class="pt-4 text-center">
-            <video ref={videoRef} playsinline autoPlay style={{ width: "100%" }}></video>
+            <video ref={videoRef} playsinline autoPlay style={{ width: "100%", height: "auto" }}></video>
             {error && <p class={styles.error}>{error}</p>}
 
             {/* Show camera select dropdown if more than one camera */}
