@@ -19,8 +19,6 @@ export default function QR2Text() {
         reset()
     }, [fromFile])
 
-    //const encText = useRef("")
-
     const handleDecrypted = (decryptedText) => {
         setText(decryptedText) // Set the decrypted text in state
         setCreated(true)
@@ -30,11 +28,28 @@ export default function QR2Text() {
         setText("")
         setPassword("") // Reset password state
         setCreated(false)
+        setError("") // Clear error when resetting
     }
 
     const copy = (e) => {
         copyText(e, divRef, "Decrypted text")
     }
+
+    // Effect for requesting camera permissions when switching to scanner mode
+    useEffect(() => {
+        if (!fromFile && !created) {
+            navigator.mediaDevices
+                .getUserMedia({ video: true })
+                .then((stream) => {
+                    console.log("Camera access granted")
+                    // You can also handle the stream here if needed for setup
+                })
+                .catch((err) => {
+                    console.error("Error accessing camera: ", err)
+                    setError("Unable to access camera. Please check your permissions.")
+                })
+        }
+    }, [fromFile, created])
 
     return (
         <>
@@ -73,8 +88,8 @@ export default function QR2Text() {
                             />
                         </div>
                         {fromFile && !created && <FileUploader password={password} onDecrypted={handleDecrypted} />}
-                        {!fromFile && !created && <Scanner password={password} onDecrypted={handleDecrypted} />}{" "}
-                        {/* Pass password prop */}
+                        {!fromFile && !created && <Scanner password={password} onDecrypted={handleDecrypted} />}
+                        {/* Scanner component now handles camera permissions */}
                         {created && (
                             <div class="pt-2">
                                 <div class={styles.labelB}>Plain text</div>
