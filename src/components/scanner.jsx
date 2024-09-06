@@ -27,11 +27,23 @@ export default function Scanner({ password, onDecrypted }) {
         })
     }, [])
 
+    // Stop any running video stream
+    const stopVideoStream = () => {
+        if (videoRef.current && videoRef.current.srcObject) {
+            const tracks = videoRef.current.srcObject.getTracks()
+            tracks.forEach((track) => track.stop())
+            videoRef.current.srcObject = null
+        }
+    }
+
     // Start QR Scanner with the selected camera
     useEffect(() => {
         if (!selectedCamera || !videoRef.current) return
 
         const startScanner = async () => {
+            // Stop any previous video stream
+            stopVideoStream()
+
             // Stop any previous scanner instance and clean up
             if (qrScanner) {
                 await qrScanner.stop()
@@ -51,7 +63,10 @@ export default function Scanner({ password, onDecrypted }) {
             }
         }
 
-        startScanner()
+        // Add a slight delay before starting the scanner to ensure proper initialization
+        setTimeout(() => {
+            startScanner()
+        }, 200) // Delay of 200ms
 
         // Cleanup the QR scanner on component unmount or when the selected camera changes
         return () => {
@@ -59,6 +74,7 @@ export default function Scanner({ password, onDecrypted }) {
                 qrScanner.stop()
                 qrScanner.destroy()
             }
+            stopVideoStream() // Ensure the video stream is stopped
         }
     }, [selectedCamera]) // Only run when selectedCamera changes
 
