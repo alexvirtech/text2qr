@@ -10,6 +10,7 @@ export default function Scanner({ password, onDecrypted }) {
     const [cameras, setCameras] = useState([])
     const [selectedCamera, setSelectedCamera] = useState("") // Store the selected camera
     const [stream, setStream] = useState(null) // Store the media stream
+    const [isSwitching, setIsSwitching] = useState(false) // Track camera switching status
 
     // Update the password ref whenever the password changes
     useEffect(() => {
@@ -32,13 +33,12 @@ export default function Scanner({ password, onDecrypted }) {
         if (stream) {
             stream.getTracks().forEach((track) => track.stop()) // Stop all tracks
             videoRef.current.srcObject = null // Detach the stream from the video element
-            setStream(null)
         }
     }
 
     // Start the video stream with the selected camera
-    const startVideoStream = async () => {
-        if (!selectedCamera || !videoRef.current) return
+    const startVideoStream = async (retry = false) => {
+        if (!selectedCamera || !videoRef.current || isSwitching) return
 
         try {
             // Stop any existing stream before starting a new one
@@ -55,19 +55,39 @@ export default function Scanner({ password, onDecrypted }) {
             videoRef.current.play() // Ensure the video is playing
 
             console.log("Started video stream with camera:", selectedCamera)
-            setError("") // Clear any previous errors
+            setIsSwitching(false) // Reset camera switching status
         } catch (err) {
             setError(`Error accessing camera: ${err.message}`)
             console.error("Error starting video stream:", err)
-            stopVideoStream() // Ensure that the stream is fully stopped in case of an error
+
+            if (!retry) {
+                console.log("Retrying video stream initialization...")
+                setTimeout(() => startVideoStream(true), 500) // Retry after a short delay
+            }
         }
+    }
+
+    // Handle QR scanner once the video stream is ready
+    const startQrScanner = () => {
+        if (!videoRef.current) return
+
+        const qrScanner = new QrScanner(videoRef.current, (result) => handleScanResult(result), {
+            highlightScanRegion: true,
+        })
+
+        qrScanner.start().catch((err) => {
+            setError(`Error starting QR scanner: ${err.message}`)
+        })
+
+        return qrScanner
     }
 
     // When the selected camera changes or the component mounts, restart the video stream
     useEffect(() => {
         if (selectedCamera) {
             console.log("Selected camera changed, restarting video stream...")
-            startVideoStream() // Start the video stream when camera is selected
+            setIsSwitching(true) // Mark as switching cameras
+            startVideoStream() // Start the video stream and allow retry if needed
         }
 
         return () => {
