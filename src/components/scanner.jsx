@@ -9,7 +9,7 @@ export default function Scanner({ password, onDecrypted }) {
     const [error, setError] = useState("")
     const [cameras, setCameras] = useState([])
     const [selectedCamera, setSelectedCamera] = useState("") // Store the selected camera
-    const [qrScanner, setQrScanner] = useState(null)
+    const [stream, setStream] = useState(null) // Store the media stream
 
     // Update the password ref whenever the password changes
     useEffect(() => {
@@ -29,54 +29,63 @@ export default function Scanner({ password, onDecrypted }) {
 
     // Stop any running video stream
     const stopVideoStream = () => {
-        if (videoRef.current && videoRef.current.srcObject) {
-            const tracks = videoRef.current.srcObject.getTracks()
-            tracks.forEach((track) => track.stop())
-            videoRef.current.srcObject = null
+        if (stream) {
+            stream.getTracks().forEach((track) => track.stop()) // Stop all tracks
+            videoRef.current.srcObject = null // Detach the stream from the video element
         }
     }
 
-    // Start QR Scanner with the selected camera
-    useEffect(() => {
+    // Start the video stream with the selected camera
+    const startVideoStream = async () => {
         if (!selectedCamera || !videoRef.current) return
 
-        const startScanner = async () => {
-            // Stop any previous video stream
+        try {
+            // Stop any existing stream before starting a new one
             stopVideoStream()
 
-            // Stop any previous scanner instance and clean up
-            if (qrScanner) {
-                await qrScanner.stop()
-                qrScanner.destroy()
-            }
+            const newStream = await navigator.mediaDevices.getUserMedia({
+                video: {
+                    deviceId: { exact: selectedCamera },
+                },
+            })
 
-            try {
-                const newQrScanner = new QrScanner(videoRef.current, (result) => handleScanResult(result), {
-                    highlightScanRegion: true,
-                    preferredCamera: selectedCamera, // Set the selected camera as the preferred one
-                })
+            setStream(newStream) // Save the new stream
+            videoRef.current.srcObject = newStream // Attach the stream to the video element
+            videoRef.current.play() // Ensure the video is playing
 
-                await newQrScanner.start() // Start the QR scanner
-                setQrScanner(newQrScanner) // Save the scanner instance
-            } catch (err) {
-                setError(`Error starting QR scanner: ${err.message}`)
-            }
+            console.log("Started video stream with camera:", selectedCamera)
+        } catch (err) {
+            setError(`Error accessing camera: ${err.message}`)
+            console.error("Error starting video stream:", err)
+        }
+    }
+
+    // Start the QR scanner once the video stream is ready
+    const startQrScanner = () => {
+        if (!videoRef.current) return
+
+        const qrScanner = new QrScanner(videoRef.current, (result) => handleScanResult(result), {
+            highlightScanRegion: true,
+        })
+
+        qrScanner.start().catch((err) => {
+            setError(`Error starting QR scanner: ${err.message}`)
+        })
+
+        return qrScanner
+    }
+
+    // When the selected camera changes or the component mounts, restart the video stream
+    useEffect(() => {
+        if (selectedCamera) {
+            console.log("Selected camera changed, restarting video stream...")
+            startVideoStream() // Start the video stream with the selected camera
         }
 
-        // Add a slight delay before starting the scanner to ensure proper initialization
-        setTimeout(() => {
-            startScanner()
-        }, 200) // Delay of 200ms
-
-        // Cleanup the QR scanner on component unmount or when the selected camera changes
         return () => {
-            if (qrScanner) {
-                qrScanner.stop()
-                qrScanner.destroy()
-            }
-            stopVideoStream() // Ensure the video stream is stopped
+            stopVideoStream() // Stop the video stream when the component unmounts
         }
-    }, [selectedCamera]) // Only run when selectedCamera changes
+    }, [selectedCamera])
 
     const handleScanResult = (result) => {
         try {
