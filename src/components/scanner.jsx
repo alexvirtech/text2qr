@@ -10,7 +10,8 @@ export default function Scanner({ password, onDecrypted }) {
     const [cameras, setCameras] = useState([])
     const [selectedCamera, setSelectedCamera] = useState("") // Store the selected camera
     const [stream, setStream] = useState(null) // Store the media stream
-    const [isSwitching, setIsSwitching] = useState(false) // Track camera switching status
+    const [permissionsGranted, setPermissionsGranted] = useState(false) // Track camera permissions
+    const [isSwitching, setIsSwitching] = useState(false) // Track camera switching
 
     // Update the password ref whenever the password changes
     useEffect(() => {
@@ -33,7 +34,17 @@ export default function Scanner({ password, onDecrypted }) {
         if (stream) {
             stream.getTracks().forEach((track) => track.stop()) // Stop all tracks
             videoRef.current.srcObject = null // Detach the stream from the video element
+            setStream(null)
         }
+    }
+
+    // Function to handle permission check and video stream retry for iOS
+    const retryVideoStream = (retryCount = 0) => {
+        if (retryCount >= 3) return // Limit retries to 3 attempts
+
+        setTimeout(() => {
+            startVideoStream(true) // Attempt to reinitialize the video stream
+        }, 500 * retryCount) // Delay each retry progressively
     }
 
     // Start the video stream with the selected camera
@@ -55,6 +66,7 @@ export default function Scanner({ password, onDecrypted }) {
             videoRef.current.play() // Ensure the video is playing
 
             console.log("Started video stream with camera:", selectedCamera)
+            setPermissionsGranted(true) // Mark permissions as granted once the stream starts
             setIsSwitching(false) // Reset camera switching status
         } catch (err) {
             setError(`Error accessing camera: ${err.message}`)
@@ -62,7 +74,7 @@ export default function Scanner({ password, onDecrypted }) {
 
             if (!retry) {
                 console.log("Retrying video stream initialization...")
-                setTimeout(() => startVideoStream(true), 500) // Retry after a short delay
+                retryVideoStream(1) // Retry initialization if it fails
             }
         }
     }
@@ -82,9 +94,16 @@ export default function Scanner({ password, onDecrypted }) {
         return qrScanner
     }
 
+    // Handle the first access (iOS permission granting issue)
+    useEffect(() => {
+        if (permissionsGranted && selectedCamera) {
+            startVideoStream() // Start video stream only when permission is granted
+        }
+    }, [permissionsGranted, selectedCamera])
+
     // When the selected camera changes or the component mounts, restart the video stream
     useEffect(() => {
-        if (selectedCamera) {
+        if (selectedCamera && !isSwitching) {
             console.log("Selected camera changed, restarting video stream...")
             setIsSwitching(true) // Mark as switching cameras
             startVideoStream() // Start the video stream and allow retry if needed
