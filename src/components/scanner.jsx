@@ -10,7 +10,7 @@ export default function Scanner({ password, onDecrypted }) {
     const [cameras, setCameras] = useState([])
     const [selectedCamera, setSelectedCamera] = useState("") // Store the selected camera
     const [stream, setStream] = useState(null) // Store the media stream
-    const [permissionsGranted, setPermissionsGranted] = useState(false) // Track camera permissions
+    const [retryNeeded, setRetryNeeded] = useState(false) // Track if retry is needed for the stream
 
     // Update the password ref whenever the password changes
     useEffect(() => {
@@ -37,7 +37,7 @@ export default function Scanner({ password, onDecrypted }) {
     }
 
     // Start the video stream with the selected camera
-    const startVideoStream = async () => {
+    const startVideoStream = async (retry = false) => {
         if (!selectedCamera || !videoRef.current) return
 
         try {
@@ -55,45 +55,31 @@ export default function Scanner({ password, onDecrypted }) {
             videoRef.current.play() // Ensure the video is playing
 
             console.log("Started video stream with camera:", selectedCamera)
-
-            setPermissionsGranted(true) // Mark permissions as granted once the stream starts
+            setRetryNeeded(false) // Clear retry state
         } catch (err) {
             setError(`Error accessing camera: ${err.message}`)
             console.error("Error starting video stream:", err)
 
-            if (err.name === "NotAllowedError" || err.name === "PermissionDeniedError") {
-                setPermissionsGranted(false)
+            // If the first attempt fails, set a flag to retry the stream
+            if (!retryNeeded && retry) {
+                setRetryNeeded(true)
+                console.log("Retrying video stream initialization...")
+                setTimeout(() => startVideoStream(true), 500) // Retry after a short delay
             }
         }
     }
 
-    // Start the QR scanner once the video stream is ready
-    const startQrScanner = () => {
-        if (!videoRef.current) return
-
-        const qrScanner = new QrScanner(videoRef.current, (result) => handleScanResult(result), {
-            highlightScanRegion: true,
-        })
-
-        qrScanner.start().catch((err) => {
-            setError(`Error starting QR scanner: ${err.message}`)
-        })
-
-        return qrScanner
-    }
-
-    // Handle the scenario where permission is denied and video doesn't start
+    // When the selected camera changes or the component mounts, restart the video stream
     useEffect(() => {
-        if (selectedCamera && permissionsGranted) {
-            startVideoStream() // Start the video stream once permissions are granted
-        } else {
-            console.log("Permission not granted, waiting for user action...")
+        if (selectedCamera) {
+            console.log("Selected camera changed, restarting video stream...")
+            startVideoStream(true) // Start the video stream and allow retry if needed
         }
 
         return () => {
             stopVideoStream() // Stop the video stream when the component unmounts
         }
-    }, [selectedCamera, permissionsGranted])
+    }, [selectedCamera])
 
     const handleScanResult = (result) => {
         try {
