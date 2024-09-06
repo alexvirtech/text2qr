@@ -10,7 +10,6 @@ export default function Scanner({ password, onDecrypted }) {
     const [cameras, setCameras] = useState([])
     const [selectedCamera, setSelectedCamera] = useState("") // Store the selected camera
     const [stream, setStream] = useState(null) // Store the media stream
-    const [retryNeeded, setRetryNeeded] = useState(false) // Track if retry is needed for the stream
 
     // Update the password ref whenever the password changes
     useEffect(() => {
@@ -33,11 +32,12 @@ export default function Scanner({ password, onDecrypted }) {
         if (stream) {
             stream.getTracks().forEach((track) => track.stop()) // Stop all tracks
             videoRef.current.srcObject = null // Detach the stream from the video element
+            setStream(null)
         }
     }
 
     // Start the video stream with the selected camera
-    const startVideoStream = async (retry = false) => {
+    const startVideoStream = async () => {
         if (!selectedCamera || !videoRef.current) return
 
         try {
@@ -55,17 +55,11 @@ export default function Scanner({ password, onDecrypted }) {
             videoRef.current.play() // Ensure the video is playing
 
             console.log("Started video stream with camera:", selectedCamera)
-            setRetryNeeded(false) // Clear retry state
+            setError("") // Clear any previous errors
         } catch (err) {
             setError(`Error accessing camera: ${err.message}`)
             console.error("Error starting video stream:", err)
-
-            // If the first attempt fails, set a flag to retry the stream
-            if (!retryNeeded && retry) {
-                setRetryNeeded(true)
-                console.log("Retrying video stream initialization...")
-                setTimeout(() => startVideoStream(true), 500) // Retry after a short delay
-            }
+            stopVideoStream() // Ensure that the stream is fully stopped in case of an error
         }
     }
 
@@ -73,7 +67,7 @@ export default function Scanner({ password, onDecrypted }) {
     useEffect(() => {
         if (selectedCamera) {
             console.log("Selected camera changed, restarting video stream...")
-            startVideoStream(true) // Start the video stream and allow retry if needed
+            startVideoStream() // Start the video stream when camera is selected
         }
 
         return () => {
