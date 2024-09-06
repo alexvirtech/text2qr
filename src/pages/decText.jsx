@@ -24,7 +24,7 @@ export default function DecText() {
         e.preventDefault()
         try {
             const txt = decrypt(encText.current.value, password.current.value)
-            if (text) {
+            if (txt) {
                 setText(txt)
                 setCreated(true)
             } else {
@@ -82,8 +82,7 @@ export default function DecText() {
                                 <div class={styles.labelB}>Plain text</div>
                                 <textarea
                                     readOnly
-                                    ref={divRef}
-                                    name="text"
+                                    ref={divRef}                                    
                                     class={styles.textInput + " rounded-none"}
                                     onClick={copy}
                                     title={text === "" ? "" : "Click to copy to clipboard"}

@@ -57,8 +57,8 @@ export default function QR2Text() {
                 <form onReset={() => reset()}>
                     <div>
                         <div class="tablet:flex tablet:justify-between gap-2 pt-4 tablet:h-16 tablet:items-center">
-                            <div class="text-3xl">QR to Text</div>
-                            <div class="mt-4 mb-2 tablet:my-0">
+                            <div class="text-3xl">QR to Text - From File</div>
+                            {/* <div class="mt-4 mb-2 tablet:my-0">
                                 <button
                                     type="button"
                                     onClick={() => setFromFile(true)}
@@ -73,7 +73,7 @@ export default function QR2Text() {
                                 >
                                     From Scan
                                 </button>
-                            </div>
+                            </div> */}
                         </div>
                         <div class="pt-2">
                             <div class={styles.labelB}>Password</div>

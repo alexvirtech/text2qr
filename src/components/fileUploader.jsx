@@ -30,8 +30,9 @@ export default function FileUploader({ password, onDecrypted }) {
                         const qrCode = jsQR(imageData.data, canvas.width, canvas.height)
 
                         if (qrCode) {
+                            const data = qrCode.data.replace('https://text2qr.com/?ds=', '') // Extract the encrypted data from the QR code 
                             // Proceed if QR code is found
-                            const decryptedText = decryptFileText(qrCode.data)
+                            const decryptedText = decryptFileText(data)
                             if (decryptedText) {
                                 onDecrypted(decryptedText) // Pass the decrypted text back to the parent component
                             } else {

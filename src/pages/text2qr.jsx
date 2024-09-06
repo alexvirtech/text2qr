@@ -58,8 +58,9 @@ export default function Text2QR() {
     const validateAndExecute = (e) => {
         e.preventDefault()
 
-        if (repPassword.current.reportValidity()) {
-            const ciphertext = encrypt(plainText.current.value, password.current.value)
+        if (repPassword.current.reportValidity()) {            
+            const ds = encrypt(plainText.current.value, password.current.value)
+            const ciphertext = `https://text2qr.com/?ds=${ds}` 
             setCiphertext(ciphertext)
             setCreated(true)
         } else {
