@@ -10,20 +10,13 @@ export default function DecScan() {
     const [created, setCreated] = useState(false)
     const [error, setError] = useState("")
     const [text, setText] = useState("")
-    const [ciphertext, setCiphertext] = useState("")
     const divRef = useRef(null)
 
-    //const encText = useRef("")
     const password = useRef("")
 
     useEffect(() => {
         if(password.current)password.current.focus()
     }, [])
-
-    useEffect(() => {
-        //
-        //console.log(state.encText)
-    }, [state.encText])
 
     const validateAndExecute = (e) => {
         e.preventDefault()
@@ -33,7 +26,6 @@ export default function DecScan() {
                 setText(txt)
                 setCreated(true)
             } else {
-                //reset()
                 setError("Error decrypting text")
             }
         } catch (e) {
@@ -56,7 +48,7 @@ export default function DecScan() {
     return (
         <>
             <div class="w-full max-w-[800px] mx-auto px-8">
-                {/* {state.encText ? ( */}
+                {state.encText ? (
                     <form onSubmit={(e) => validateAndExecute(e)} onReset={() => reset()}>
                         <div>
                             <div class="text-3xl pt-4">QR to Text - From Scan</div>
@@ -110,12 +102,11 @@ export default function DecScan() {
                                 )}
                             </div>
                             <Error text={error} clear={() => setError("")} />
-                        </div>
-                        <div>received: {state.encText}</div>
+                        </div>                        
                     </form>
-               {/*  ) : (
+                 ) : (
                     <div class="pt-4">No data for decryption</div>
-                )} */}
+                )} 
             </div>
         </>
     )

@@ -70,6 +70,7 @@ export const decrypt = (text, password) => {
     try {
         return CryptoJS.AES.decrypt(text, password).toString(CryptoJS.enc.Utf8)
     } catch (e) {
-        return null
+        return JSON.stringify(e) // temp
+        //return null
     }
 } 
