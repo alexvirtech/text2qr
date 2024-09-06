@@ -104,9 +104,9 @@ export default function DecScan() {
                             <Error text={error} clear={() => setError("")} />
                         </div>                        
                     </form>
-                /*  ) : (
+                 {/*  ) : (
                     <div class="pt-4">No data for decryption</div>
-                )}  */
+                )}   */}
             </div>
         </>
     )
