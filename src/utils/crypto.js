@@ -63,14 +63,17 @@ export const decryptText = (encryptedMessage, senderPublicKey, recipientPrivateK
 
 
 export const encrypt = (text, password) => {
-    return CryptoJS.AES.encrypt(text, password).toString()
+    //return CryptoJS.AES.encrypt(text, password).toString()
+    const encrypted = CryptoJS.AES.encrypt(CryptoJS.enc.Utf8.parse(text), password); // Parse text as UTF-8
+    return encrypted.toString(); // Return encrypted string
 }
 
 export const decrypt = (text, password) => {    
     try {
-        return CryptoJS.AES.decrypt(text, password).toString(CryptoJS.enc.Utf8)
+        //return CryptoJS.AES.decrypt(text, password).toString(CryptoJS.enc.Utf8)
+        const decrypted = CryptoJS.AES.decrypt(text, password);
+        return decrypted.toString(CryptoJS.enc.Utf8); // Convert decrypted data to UTF-8
     } catch (e) {
-        //return JSON.stringify(e) // temp
         return null
     }
 } 
