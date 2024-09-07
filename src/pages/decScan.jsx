@@ -14,6 +14,7 @@ export default function DecScan() {
     const [text, setText] = useState("")
     const divRef = useRef(null)
     const password = useRef("")
+    const [shwoReset, setShowReset] = useState(false)
 
     const [temp, setTemp] = useState("")
 
@@ -38,6 +39,9 @@ export default function DecScan() {
             if (txt) {
                 setText(txt)
                 setCreated(true)
+                setTimeout(() => {
+                    setShowReset(true)
+                }, 5000)
             } else {
                 setError("Error decrypting text")
             }
@@ -62,7 +66,7 @@ export default function DecScan() {
         <>
             <div class="w-full max-w-[800px] mx-auto px-8">
                 {state.encText || true ? (
-                    <form onSubmit={(e) => validateAndExecute(e)} onReset={() => reset()}>
+                    <form onSubmit={(e) => validateAndExecute(e)}>
                         <div>
                             <div class="text-3xl pt-4">QR to Text - From Scan</div>
 
@@ -104,8 +108,8 @@ export default function DecScan() {
                             )}
 
                             <div class="mt-4 flex justify-center gap-2">
-                                {created ? (
-                                    <button type="reset" class={styles.button}>
+                                {created && shwoReset ? (
+                                    <button type="button" class={styles.button} onClick={()=>reset()}>
                                         Reset
                                     </button>
                                 ) : (
