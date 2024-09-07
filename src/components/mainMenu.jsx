@@ -33,7 +33,7 @@ const MainMenu = ({ close }) => {
 
     return (
         <LayoutMenu close={() => close()}>
-            <div class="overflow-y-scroll no-scrollbar max-h-[100vh] left-0 top-0 z-10 bottom-0 absolute bg-gray-800">
+            <div class="no-scrollbar max-h-[100vh] left-0 top-0 z-10 bottom-0 absolute bg-gray-800">
                 <div class="flex flex-col w-[300px] h-full">
                     <div class="flex items-center justify-between h-16 border-b border-gray-700 px-4 mb-2">
                         <Link href={"/"} onClick={() => handleLinkClick("/")} 
