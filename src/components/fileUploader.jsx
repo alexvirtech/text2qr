@@ -3,6 +3,8 @@ import Context from "../utils/context"
 import { decrypt } from "../utils/crypto"
 import jsQR from "jsqr" // Import jsQR for decoding the QR code
 import Error from "./error"
+import dotenv from "dotenv"
+dotenv.config()
 
 export default function FileUploader({ password, onDecrypted, onFileUploaded, onReset }) {
     const { state, dispatch } = useContext(Context)
@@ -54,7 +56,8 @@ export default function FileUploader({ password, onDecrypted, onFileUploaded, on
                 const qrCode = jsQR(imageData.data, canvas.width, canvas.height)
 
                 if (qrCode) {
-                    const data = qrCode.data.replace("https://text2qr.com/?ds=", "") // Clean the data URL if needed
+                    //const ciphertext = `${process.env.VITE_HOST}/?ds=${ds}`
+                    const data = qrCode.data.replace(`${process.env.VITE_HOST}/?ds=`, "") // Clean the data URL if needed
                     const decryptedText = decrypt(data, password) // Use the decrypt function from utils/crypto
 
                     if (decryptedText) {

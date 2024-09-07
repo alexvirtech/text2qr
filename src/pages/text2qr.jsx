@@ -5,6 +5,8 @@ import qrcode from "qrcode"
 import { copyText } from "../utils/lib"
 import { encrypt, decrypt } from "../utils/crypto"
 import { showPopup } from "../utils/lib"
+import dotenv from "dotenv"
+dotenv.config()
 
 export default function Text2QR() {
     const { state, dispatch } = useContext(Context)
@@ -60,7 +62,8 @@ export default function Text2QR() {
 
         if (repPassword.current.reportValidity()) {            
             const ds = encrypt(plainText.current.value, password.current.value)
-            const ciphertext = `https://text2qr.com/?ds=${ds}` 
+            const ciphertext = `${process.env.VITE_HOST}/?ds=${ds}`
+            //const ciphertext = `https://text2qr.com/?ds=${ds}` 
             setCiphertext(ciphertext)
             setCreated(true)
         } else {
