@@ -57,8 +57,9 @@ export default function QR2Text() {
             <div class="w-full max-w-[800px] mx-auto px-8">
                 <form onReset={reset} onSubmit={decrypt}>
                     <div>
-                        <div class="tablet:flex tablet:justify-between gap-2 pt-4 tablet:h-16 tablet:items-center">
-                            <div class="text-3xl">QR to Text - From File</div>
+                        <div class="pt-4">
+                            <div class="text-3xl">QR to Text</div>
+                            <div>Use a file containig the QR code</div>
                         </div>
 
                         {/* Show File Name, Password Input, and Reset Button After File Upload */}
