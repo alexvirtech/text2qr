@@ -1,13 +1,23 @@
-import { useRef, useState } from "preact/hooks"
+import { useEffect, useRef, useState, useContext } from "preact/hooks"
+import Context from "../utils/context"
 import { decrypt } from "../utils/crypto"
 import jsQR from "jsqr" // Import jsQR for decoding the QR code
 import Error from "./error"
 
-export default function FileUploader({ password, onDecrypted, onFileUploaded }) {
+export default function FileUploader({ password, onDecrypted, onFileUploaded, onReset }) {
+    const { state, dispatch } = useContext(Context)
     const fileInput = useRef(null)
     const [error, setError] = useState("")
     const [fileData, setFileData] = useState(null) // Store file data for decryption
     const [isReadyToDecrypt, setIsReadyToDecrypt] = useState(false) // Track if file is ready for decryption
+
+    useEffect(() => {
+        if (state.startDec) {
+            handleDecrypt().then(() => {
+                dispatch({ type: "START_DECRYPT", payload: false })
+            })
+        }
+    }, [state.startDec])
 
     const handleFileChange = (event) => {
         const file = selectFile(event)
@@ -80,26 +90,41 @@ export default function FileUploader({ password, onDecrypted, onFileUploaded }) 
         fileInput.current.click()
     }
 
+    const reset = () => {
+        setFileData(null) // Reset file data
+        setIsReadyToDecrypt(false) // Reset decryption status
+        setError("") // Clear error messages
+        if (fileInput.current) {
+            fileInput.current.value = "" // Clear the file input field
+        }
+        onReset() // Notify parent component to reset
+    }
+
     return (
         <>
-            <div
-                onDrop={handleFileChange}
-                onDragOver={preventDefault}
-                class="border-dashed border h-[200px] border-gray-400 rounded-lg p-4 text-center mt-6 flex flex-col justify-center items-center"
-            >
-                <div class="cursor-pointer" onClick={execute}>
-                    <label class="dark:text-m-gray-light-2">
-                        Drag and drop an encrypted file here or click to select it from file explorer.
-                    </label>
-                    <input type="file" ref={fileInput} onChange={handleFileChange} style={{ display: "none" }} />
+            {!isReadyToDecrypt && (
+                <div
+                    onDrop={handleFileChange}
+                    onDragOver={preventDefault}
+                    class="border-dashed border h-[200px] border-gray-400 rounded-lg p-4 text-center mt-6 flex flex-col justify-center items-center"
+                >
+                    <div class="cursor-pointer" onClick={execute}>
+                        <label class="dark:text-m-gray-light-2">
+                            Drag and drop an encrypted file here or click to select it from file explorer.
+                        </label>
+                        <input type="file" ref={fileInput} onChange={handleFileChange} style={{ display: "none" }} />
+                    </div>
                 </div>
-            </div>
+            )}
 
             {/* Decrypt Button will only appear if file is ready and password is provided */}
             {isReadyToDecrypt && (
-                <div class="flex justify-center mt-4">
+                <div class="flex justify-center mt-4 gap-2">
                     <button type="button" class="bg-blue-500 text-white px-4 py-2 rounded" onClick={handleDecrypt}>
                         Decrypt
+                    </button>
+                    <button type="button" class="bg-blue-500 text-white px-4 py-2 rounded" onClick={reset}>
+                        Reset
                     </button>
                 </div>
             )}
