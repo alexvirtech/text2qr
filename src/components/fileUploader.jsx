@@ -3,59 +3,66 @@ import { decrypt } from "../utils/crypto"
 import jsQR from "jsqr" // Import jsQR for decoding the QR code
 import Error from "./error"
 
-export default function FileUploader({ password, onDecrypted }) {
+export default function FileUploader({ password, onDecrypted, onFileUploaded }) {
     const fileInput = useRef(null)
     const [error, setError] = useState("")
+    const [fileData, setFileData] = useState(null) // Store file data for decryption
+    const [isReadyToDecrypt, setIsReadyToDecrypt] = useState(false) // Track if file is ready for decryption
 
-    const handleDecrypt = async (event) => {
-        event.preventDefault()
+    const handleFileChange = (event) => {
         const file = selectFile(event)
         if (file) {
             const reader = new FileReader()
             reader.onload = (e) => {
-                try {
-                    const imageSrc = e.target.result
-                    const image = new Image()
-                    image.src = imageSrc
-
-                    image.onload = () => {
-                        const canvas = document.createElement("canvas")
-                        const context = canvas.getContext("2d")
-                        canvas.width = image.width
-                        canvas.height = image.height
-                        context.drawImage(image, 0, 0)
-
-                        // Extract image data from the canvas
-                        const imageData = context.getImageData(0, 0, canvas.width, canvas.height)
-
-                        // Decode the QR code using jsQR
-                        const qrCode = jsQR(imageData.data, canvas.width, canvas.height)
-
-                        if (qrCode) {
-                            const data = qrCode.data.replace("https://text2qr.com/?ds=", "") // Extract the encrypted data from the QR code
-                            // Proceed if QR code is found
-                            const decryptedText = decryptFileText(data)
-                            if (decryptedText) {
-                                onDecrypted(decryptedText) // Pass the decrypted text back to the parent component
-                            } else {
-                                setError("Decryption failed. Please check the password.")
-                            }
-                        } else {
-                            console.error("No QR code found in the image.")
-                            setError("No QR code found in the image.")
-                        }
-                    }
-
-                    image.onerror = () => {
-                        console.error("Failed to load the image.")
-                        setError("Failed to load the image. Please try a different file.")
-                    }
-                } catch (e) {
-                    console.error("Error while processing the file:", e)
-                    setError("Error occurred while processing the file.")
-                }
+                const imageSrc = e.target.result
+                setFileData(imageSrc) // Save the image source for decryption
+                setIsReadyToDecrypt(true) // Ready to decrypt once file is uploaded
+                onFileUploaded(file.name) // Notify parent with file name
             }
             reader.readAsDataURL(file) // Read file as DataURL for image loading
+        }
+    }
+
+    const handleDecrypt = async () => {
+        if (!fileData || !password) {
+            setError("Please upload a file and enter a password.")
+            return
+        }
+
+        try {
+            const image = new Image()
+            image.src = fileData
+
+            image.onload = () => {
+                const canvas = document.createElement("canvas")
+                const context = canvas.getContext("2d")
+                canvas.width = image.width
+                canvas.height = image.height
+                context.drawImage(image, 0, 0)
+
+                const imageData = context.getImageData(0, 0, canvas.width, canvas.height)
+                const qrCode = jsQR(imageData.data, canvas.width, canvas.height)
+
+                if (qrCode) {
+                    const data = qrCode.data.replace("https://text2qr.com/?ds=", "") // Clean the data URL if needed
+                    const decryptedText = decrypt(data, password) // Use the decrypt function from utils/crypto
+
+                    if (decryptedText) {
+                        onDecrypted(decryptedText) // Pass decrypted text to the parent component
+                    } else {
+                        setError("Decryption failed. Please check the password.")
+                    }
+                } else {
+                    setError("No QR code found in the image.")
+                }
+            }
+
+            image.onerror = () => {
+                setError("Failed to load the image. Please try a different file.")
+            }
+        } catch (e) {
+            console.error("Error while decrypting the file:", e)
+            setError("An error occurred while decrypting the file.")
         }
     }
 
@@ -65,46 +72,38 @@ export default function FileUploader({ password, onDecrypted }) {
         return file
     }
 
-    const decryptFileText = (ciphertext) => {
-        try {
-            return decrypt(ciphertext, password) // Decrypt the QR code data using the provided password
-        } catch (error) {
-            console.error("Decryption failed:", error)
-            return null
-        }
-    }
-
     const preventDefault = (e) => {
         e.preventDefault()
     }
 
-    const execute = async () => {
+    const execute = () => {
         fileInput.current.click()
     }
 
     return (
         <>
             <div
-                onDrop={handleDecrypt}
+                onDrop={handleFileChange}
                 onDragOver={preventDefault}
                 class="border-dashed border h-[200px] border-gray-400 rounded-lg p-4 text-center mt-6 flex flex-col justify-center items-center"
             >
-                <div class="hidden">
-                    <input type="file" ref={fileInput} onChange={handleDecrypt} style={{ display: "none" }} />
-                    <button onClick={() => fileInput.current.click()}>Decrypt and Download</button>
-                </div>
-
                 <div class="cursor-pointer" onClick={execute}>
                     <label class="dark:text-m-gray-light-2">
                         Drag and drop an encrypted file here or click to select it from file explorer.
                     </label>
-                    <div>
-                        <span class="border-t border-m-gray-light-1 mt-4 text-xs">
-                            The encrypted file will be decrypted automatically.
-                        </span>
-                    </div>
+                    <input type="file" ref={fileInput} onChange={handleFileChange} style={{ display: "none" }} />
                 </div>
             </div>
+
+            {/* Decrypt Button will only appear if file is ready and password is provided */}
+            {isReadyToDecrypt && (
+                <div class="flex justify-center mt-4">
+                    <button type="button" class="bg-blue-500 text-white px-4 py-2 rounded" onClick={handleDecrypt}>
+                        Decrypt
+                    </button>
+                </div>
+            )}
+
             <Error text={error} clear={() => setError("")} />
         </>
     )

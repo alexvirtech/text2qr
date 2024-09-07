@@ -1,4 +1,4 @@
-import { useState, useContext, useEffect, useRef } from "preact/hooks"
+import { useState, useContext, useRef } from "preact/hooks"
 import { styles } from "../utils/styles"
 import Context from "../utils/context"
 import { copyText } from "../utils/lib"
@@ -10,7 +10,8 @@ export default function QR2Text() {
     const [created, setCreated] = useState(false)
     const [error, setError] = useState("")
     const [text, setText] = useState("")
-    const [password, setPassword] = useState("") // Manage password state
+    const [password, setPassword] = useState("")
+    const [fileName, setFileName] = useState("") // Track uploaded file name
     const divRef = useRef(null)
 
     const handleDecrypted = (decryptedText) => {
@@ -18,11 +19,17 @@ export default function QR2Text() {
         setCreated(true)
     }
 
+    const handleFileUploaded = (uploadedFileName) => {
+        setFileName(uploadedFileName) // Store the uploaded file name
+        setError("") // Clear any previous errors
+    }
+
     const reset = () => {
         setText("")
-        setPassword("") // Reset password state
+        setPassword("")
         setCreated(false)
-        setError("") // Clear error when resetting
+        setError("")
+        setFileName("") // Reset file name
     }
 
     const copy = (e) => {
@@ -32,24 +39,40 @@ export default function QR2Text() {
     return (
         <>
             <div class="w-full max-w-[800px] mx-auto px-8">
-                <form onReset={() => reset()}>
+                <form onReset={reset}>
                     <div>
                         <div class="tablet:flex tablet:justify-between gap-2 pt-4 tablet:h-16 tablet:items-center">
-                            <div class="text-3xl">QR to Text - From File</div>                            
+                            <div class="text-3xl">QR to Text - From File</div>
                         </div>
-                        <div class="pt-2">
-                            <div class={styles.labelB}>Password</div>
-                            <input
-                                type="password"
-                                class={styles.textInput + " rounded-none"}
-                                placeholder="Enter password"
-                                required
-                                disabled={created}
-                                value={password} // Bind password state to input
-                                onInput={(e) => setPassword(e.target.value)} // Update password state on change
+
+                        {/* Show File Name, Password Input, and Reset Button After File Upload */}
+                        {fileName && !created && (
+                            <div class="pt-4">
+                                <div class="pb-2">Uploaded File: {fileName}</div>
+                                <div class="pb-4">
+                                    <div class={styles.labelB}>Password</div>
+                                    <input
+                                        type="password"
+                                        class={styles.textInput + " rounded-none"}
+                                        placeholder="Enter password"
+                                        required
+                                        value={password}
+                                        onInput={(e) => setPassword(e.target.value)}
+                                    />
+                                </div>
+                            </div>
+                        )}
+
+                        {/* File Upload Area */}
+                        {!created && (
+                            <FileUploader
+                                password={password}
+                                onFileUploaded={handleFileUploaded}
+                                onDecrypted={handleDecrypted}
                             />
-                        </div>
-                        {!created && <FileUploader password={password} onDecrypted={handleDecrypted} />}                        
+                        )}
+
+                        {/* Show Decrypted Text After Successful Decryption */}
                         {created && (
                             <div class="pt-2">
                                 <div class={styles.labelB}>Plain text</div>
@@ -66,13 +89,8 @@ export default function QR2Text() {
                                 <div class={styles.comments + " text-right"}>Click text for copy to clipboard</div>
                             </div>
                         )}
-                        <div class="mt-4 flex justify-center gap-2">
-                            {created && (
-                                <button type="reset" class={styles.button}>
-                                    Reset
-                                </button>
-                            )}
-                        </div>
+
+                        {/* Error Message */}
                         <Error text={error} clear={() => setError("")} />
                     </div>
                 </form>
