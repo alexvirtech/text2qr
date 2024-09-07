@@ -121,7 +121,7 @@ export default function DecScan() {
                     <div class="pt-4">No data for decryption</div>
                 )}
             </div>
-            <div>temp: {temp}</div>
+            <div class="text-center">temp: {temp}</div>
         </>
     )
 }
