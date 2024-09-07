@@ -4,7 +4,6 @@ export default function Error({text, clear}) {
     useEffect(() => {
         if (text !== "") {
             setTimeout(() => {
-                //setError("")
                 clear()
             }, 5000)
         }

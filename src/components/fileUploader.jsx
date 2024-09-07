@@ -1,9 +1,11 @@
-import { useRef } from "preact/hooks"
+import { useRef, useState } from "preact/hooks"
 import { decrypt } from "../utils/crypto"
 import jsQR from "jsqr" // Import jsQR for decoding the QR code
+import Error from "./error"
 
 export default function FileUploader({ password, onDecrypted }) {
     const fileInput = useRef(null)
+    const [error, setError] = useState("")
 
     const handleDecrypt = async (event) => {
         event.preventDefault()
@@ -30,27 +32,27 @@ export default function FileUploader({ password, onDecrypted }) {
                         const qrCode = jsQR(imageData.data, canvas.width, canvas.height)
 
                         if (qrCode) {
-                            const data = qrCode.data.replace('https://text2qr.com/?ds=', '') // Extract the encrypted data from the QR code 
+                            const data = qrCode.data.replace("https://text2qr.com/?ds=", "") // Extract the encrypted data from the QR code
                             // Proceed if QR code is found
                             const decryptedText = decryptFileText(data)
                             if (decryptedText) {
                                 onDecrypted(decryptedText) // Pass the decrypted text back to the parent component
                             } else {
-                                alert("Decryption failed. Please check the password.")
+                                setError("Decryption failed. Please check the password.")
                             }
                         } else {
                             console.error("No QR code found in the image.")
-                            alert("No QR code found in the image.")
+                            setError("No QR code found in the image.")
                         }
                     }
 
                     image.onerror = () => {
                         console.error("Failed to load the image.")
-                        alert("Failed to load the image. Please try a different file.")
+                        setError("Failed to load the image. Please try a different file.")
                     }
                 } catch (e) {
                     console.error("Error while processing the file:", e)
-                    alert("Error occurred while processing the file.")
+                    setError("Error occurred while processing the file.")
                 }
             }
             reader.readAsDataURL(file) // Read file as DataURL for image loading
@@ -81,26 +83,29 @@ export default function FileUploader({ password, onDecrypted }) {
     }
 
     return (
-        <div
-            onDrop={handleDecrypt}
-            onDragOver={preventDefault}
-            class="border-dashed border h-[200px] border-gray-400 rounded-lg p-4 text-center mt-6 flex flex-col justify-center items-center"
-        >
-            <div class="hidden">
-                <input type="file" ref={fileInput} onChange={handleDecrypt} style={{ display: "none" }} />
-                <button onClick={() => fileInput.current.click()}>Decrypt and Download</button>
-            </div>
+        <>
+            <div
+                onDrop={handleDecrypt}
+                onDragOver={preventDefault}
+                class="border-dashed border h-[200px] border-gray-400 rounded-lg p-4 text-center mt-6 flex flex-col justify-center items-center"
+            >
+                <div class="hidden">
+                    <input type="file" ref={fileInput} onChange={handleDecrypt} style={{ display: "none" }} />
+                    <button onClick={() => fileInput.current.click()}>Decrypt and Download</button>
+                </div>
 
-            <div class="cursor-pointer" onClick={execute}>
-                <label class="dark:text-m-gray-light-2">
-                    Drag and drop an encrypted file here or click to select it from file explorer.
-                </label>
-                <div>
-                    <span class="border-t border-m-gray-light-1 mt-4 text-xs">
-                        The encrypted file will be decrypted automatically.
-                    </span>
+                <div class="cursor-pointer" onClick={execute}>
+                    <label class="dark:text-m-gray-light-2">
+                        Drag and drop an encrypted file here or click to select it from file explorer.
+                    </label>
+                    <div>
+                        <span class="border-t border-m-gray-light-1 mt-4 text-xs">
+                            The encrypted file will be decrypted automatically.
+                        </span>
+                    </div>
                 </div>
             </div>
-        </div>
+            <Error text={error} clear={() => setError("")} />
+        </>
     )
 }
