@@ -4,6 +4,8 @@ import Context from "../utils/context"
 import { copyText } from "../utils/lib"
 import { encrypt, decrypt } from "../utils/crypto"
 import Error from "../components/error"
+//
+import CryptoJS from "crypto-js"
 
 export default function DecScan() {
     const { state, dispatch } = useContext(Context)
@@ -11,11 +13,22 @@ export default function DecScan() {
     const [error, setError] = useState("")
     const [text, setText] = useState("")
     const divRef = useRef(null)
-
     const password = useRef("")
 
+    const [temp, setTemp] = useState("")
+
     useEffect(() => {
-        if(password.current)password.current.focus()
+        if (password.current) password.current.focus()
+        if (state.encText) {
+            console.log("Encrypted text from QR: ", state.encText)
+            try {
+                const t = CryptoJS.AES.decrypt(state.encText, "1").toString(CryptoJS.enc.Utf8)
+                setTemp(t)
+            } catch (e) {
+                console.error(e)
+                setTemp(JSON.stringify(e))
+            }
+        }
     }, [])
 
     const validateAndExecute = (e) => {
@@ -102,12 +115,13 @@ export default function DecScan() {
                                 )}
                             </div>
                             <Error text={error} clear={() => setError("")} />
-                        </div>                        
+                        </div>
                     </form>
-                  ) : (
+                ) : (
                     <div class="pt-4">No data for decryption</div>
-                )}  
+                )}
             </div>
+            <div>temp: {temp}</div>
         </>
     )
 }
