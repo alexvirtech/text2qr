@@ -5,3 +5,5 @@ export const pages = {
     "/dectext": "Decrypt Text",
     //"/home": "About",
 }
+
+export const getHost = () => window.location.origin
