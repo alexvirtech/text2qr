@@ -23,7 +23,6 @@ export default function Text2QR() {
     useEffect(() => {
         setCreated(false)
         plainText.current.focus()
-        dotenv.config()
     }, [])
 
     useEffect(() => {

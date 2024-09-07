@@ -12,7 +12,7 @@ import DecScan from "./pages/decScan"
 
 export function App() {
     const [state, dispatch] = useReducer(reducer, initialState)
-    //const location = useLocation()
+    const [currentPath, setCurrentPath] = useState(window.location.pathname)
 
     useEffect(() => {
         // Manually get the query params from the URL
@@ -28,10 +28,14 @@ export function App() {
         }
     }, [dispatch])
 
+    const handleRouteChange = (e) => {
+        setCurrentPath(e.url) // Update the current path on route change
+    }
+
     return (
         <Context.Provider value={{ state, dispatch }}>
-            <Layout>
-                <Router>
+            <Layout currentPath={currentPath}>
+                <Router onChange={handleRouteChange}>
                     <Home path="/" />
                     <Text2QR path="/text2qr" />
                     <QR2Text path="/qr2text" />
