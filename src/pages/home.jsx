@@ -16,11 +16,11 @@ export default function Home() {
 
     return (
         <div class="w-full max-w-[800px] mx-auto px-8 py-8 ">
-            <div class="flex justify-start gap-4 w-full">
-                <div class="w-1/3 min-h-[160px] p-4">
-                    <img src="./temp_pic.svg" alt="Temp picture" />
+            <div class="tablet:flex tablet:justify-start gap-4 w-full">
+                <div class="tablet:w-1/2 p-4">
+                    <img src="./temp_pic.svg" class="max-h-[200px] w-auto mx-auto" alt="Temp picture" />
                 </div>
-                <div class="w-2/3 pt-4">
+                <div class="grow pt-4">
                     <div class="text-2xl font-bold pb-4">
                         Create an additional layer of security for your sensitive data using password protected QR code
                     </div>
