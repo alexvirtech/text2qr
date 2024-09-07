@@ -4,6 +4,7 @@ import Context from "../utils/context"
 import { copyText } from "../utils/lib"
 import { encrypt, decrypt } from "../utils/crypto"
 import Error from "../components/error"
+import { route } from "preact-router"
 //
 //import CryptoJS from "crypto-js"
 
@@ -16,20 +17,8 @@ export default function DecScan() {
     const password = useRef("")
     const [shwoReset, setShowReset] = useState(false)
 
-    //const [temp, setTemp] = useState("")
-
     useEffect(() => {
         if (password.current) password.current.focus()
-        /* if (state.encText) {
-            console.log("Encrypted text from QR: ", state.encText)
-            try {
-                const t = CryptoJS.AES.decrypt(state.encText, "1").toString(CryptoJS.enc.Utf8)
-                setTemp(t)
-            } catch (e) {
-                console.error(e)
-                setTemp(JSON.stringify(e))
-            }
-        } */
     }, [])
 
     const validateAndExecute = (e) => {
@@ -55,7 +44,8 @@ export default function DecScan() {
         dispatch({ type: "SET_ENC_TEXT", payload: null })
         setText("")
         password.current.value = ""
-        setCreated(false)
+        setCreated(false)  
+        route("/")      
     }
 
     const copy = (e) => {
@@ -126,7 +116,6 @@ export default function DecScan() {
                     <div class="pt-4">No data for decryption</div>
                 )}
             </div>
-           {/*  <div class="text-center">temp: {temp}</div> */}
         </>
     )
 }
