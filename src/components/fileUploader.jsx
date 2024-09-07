@@ -4,7 +4,6 @@ import { decrypt } from "../utils/crypto"
 import jsQR from "jsqr" // Import jsQR for decoding the QR code
 import Error from "./error"
 import dotenv from "dotenv"
-dotenv.config()
 
 export default function FileUploader({ password, onDecrypted, onFileUploaded, onReset }) {
     const { state, dispatch } = useContext(Context)
@@ -12,6 +11,10 @@ export default function FileUploader({ password, onDecrypted, onFileUploaded, on
     const [error, setError] = useState("")
     const [fileData, setFileData] = useState(null) // Store file data for decryption
     const [isReadyToDecrypt, setIsReadyToDecrypt] = useState(false) // Track if file is ready for decryption
+
+    useEffect(() => {
+        dotenv.config()
+    }, [])
 
     useEffect(() => {
         if (state.startDec) {

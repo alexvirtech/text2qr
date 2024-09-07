@@ -6,7 +6,6 @@ import { copyText } from "../utils/lib"
 import { encrypt, decrypt } from "../utils/crypto"
 import { showPopup } from "../utils/lib"
 import dotenv from "dotenv"
-dotenv.config()
 
 export default function Text2QR() {
     const { state, dispatch } = useContext(Context)
@@ -23,6 +22,7 @@ export default function Text2QR() {
     useEffect(() => {
         setCreated(false)
         plainText.current.focus()
+        dotenv.config()
     }, [])
 
     useEffect(() => {
