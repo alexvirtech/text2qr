@@ -5,7 +5,7 @@ import { copyText } from "../utils/lib"
 import { encrypt, decrypt } from "../utils/crypto"
 import Error from "../components/error"
 //
-import CryptoJS from "crypto-js"
+//import CryptoJS from "crypto-js"
 
 export default function DecScan() {
     const { state, dispatch } = useContext(Context)
@@ -16,11 +16,11 @@ export default function DecScan() {
     const password = useRef("")
     const [shwoReset, setShowReset] = useState(false)
 
-    const [temp, setTemp] = useState("")
+    //const [temp, setTemp] = useState("")
 
     useEffect(() => {
         if (password.current) password.current.focus()
-        if (state.encText) {
+        /* if (state.encText) {
             console.log("Encrypted text from QR: ", state.encText)
             try {
                 const t = CryptoJS.AES.decrypt(state.encText, "1").toString(CryptoJS.enc.Utf8)
@@ -29,7 +29,7 @@ export default function DecScan() {
                 console.error(e)
                 setTemp(JSON.stringify(e))
             }
-        }
+        } */
     }, [])
 
     const validateAndExecute = (e) => {
@@ -108,11 +108,12 @@ export default function DecScan() {
                             )}
 
                             <div class="mt-4 flex justify-center gap-2">
-                                {created && shwoReset ? (
-                                    <button type="button" class={styles.button} onClick={()=>reset()}>
+                                {created && shwoReset && (
+                                    <button type="button" class={styles.button} onClick={() => reset()}>
                                         Reset
                                     </button>
-                                ) : (
+                                )}
+                                {!created && (
                                     <button type="submit" class={styles.button}>
                                         Decrypt
                                     </button>
@@ -125,7 +126,7 @@ export default function DecScan() {
                     <div class="pt-4">No data for decryption</div>
                 )}
             </div>
-            <div class="text-center">temp: {temp}</div>
+           {/*  <div class="text-center">temp: {temp}</div> */}
         </>
     )
 }
