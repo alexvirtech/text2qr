@@ -3,7 +3,7 @@ import { styles } from "../utils/styles"
 import Context from "../utils/context"
 import qrcode from "qrcode"
 import { copyText } from "../utils/lib"
-import { encrypt, decrypt } from "../utils/crypto"
+import { encrypt } from "../utils/crypto"
 import { showPopup } from "../utils/lib"
 import { getHost } from "../utils/common"
 
@@ -12,6 +12,7 @@ export default function Text2QR() {
     const [created, setCreated] = useState(false)
     const [error, setError] = useState("")
     const [ciphertext, setCiphertext] = useState("")
+    const [canShare, setCanShare] = useState(false) // Track if sharing is supported
     const divRef = useRef(null)
 
     const plainText = useRef("")
@@ -60,11 +61,9 @@ export default function Text2QR() {
     const validateAndExecute = (e) => {
         e.preventDefault()
 
-        if (repPassword.current.reportValidity()) {            
+        if (repPassword.current.reportValidity()) {
             const ds = encrypt(plainText.current.value, password.current.value)
-            //const ciphertext = `${process.env.VITE_HOST}/?ds=${ds}`
-            //const ciphertext = `https://text2qr.com/?ds=${ds}` 
-            const ciphertext = `${getHost()}/?ds=${ds}` 
+            const ciphertext = `${getHost()}/?ds=${ds}`
             setCiphertext(ciphertext)
             setCreated(true)
         } else {
@@ -97,6 +96,7 @@ export default function Text2QR() {
         context.clearRect(0, 0, canvas.width, canvas.height)
     }
 
+    // Implement the share functionality for sharing the QR code image
     const shareCanvas = async () => {
         const canvas = qrCodeRef.current
         const dataUrl = canvas.toDataURL()
@@ -114,10 +114,13 @@ export default function Text2QR() {
         if (navigator.canShare && navigator.canShare(shareData)) {
             try {
                 setCanShare(true)
-                navigator.share(shareData)
+                await navigator.share(shareData)
             } catch (error) {
                 setCanShare(false)
+                console.error("Sharing failed", error)
             }
+        } else {
+            console.error("Sharing is not supported on this device")
         }
     }
 
@@ -165,7 +168,7 @@ export default function Text2QR() {
                             disabled={created}
                             maxLength="1000"
                         ></textarea>
-                         <div class={styles.comments}>The recommended maximum length is 1000 Latin characters.</div>
+                        <div class={styles.comments}>The recommended maximum length is 1000 Latin characters.</div>
                     </div>
                     <div class="pt-2">
                         <div class={styles.labelB}>Password</div>
@@ -215,14 +218,17 @@ export default function Text2QR() {
 
                     <div class="mt-4 flex justify-center gap-2">
                         {created ? (
-                             <>
-                                 <button type="button" onClick={printCanvas} class={styles.button}>
-                                    Print QR Code 
+                            <>
+                                <button type="button" onClick={shareCanvas} class={styles.button}>
+                                    Share
+                                </button>
+                                <button type="button" onClick={printCanvas} class={styles.button}>
+                                    Print
                                 </button>
                                 <button type="reset" class={styles.button}>
                                     Reset
                                 </button>
-                             </>
+                            </>
                         ) : (
                             <button type="submit" class={styles.button}>
                                 Encrypt
