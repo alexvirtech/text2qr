@@ -1,5 +1,6 @@
 import { Link } from "preact-router"
 import { items } from "../utils/common"
+import { styles } from "../utils/styles"
 
 export default function Home() {
     const ItemComponent = ({ item }) => {
@@ -48,6 +49,15 @@ export default function Home() {
                         Scan a QR code with your mobile device camera to open a page. After entering the correct
                         password, the protected text will be restored.
                     </div>
+                </div>
+            </div>
+            <div class="pt-4 text-sm">
+                <div class="font-bold">This project is 100% open-source code</div>
+                <div>
+                    The source code may be explored, downloaded and used locally from the repository{" "}
+                    <a href="https://github.com/alexvirtech/text2qr" class={styles.link} target="_blank">
+                        https://github.com/alexvirtech/text2qr
+                    </a>
                 </div>
             </div>
         </div>
