@@ -61,14 +61,14 @@ export const encrypt = (text, password) => {
     return encrypted.toString() // Return encrypted string
 }
 
-/* export const decrypt = (text, password) => {
+export const decrypt = (text, password) => {
     try {
         const decrypted = CryptoJS.AES.decrypt(text, password)
         return decrypted.toString(CryptoJS.enc.Utf8) // Convert decrypted data to UTF-8
     } catch (e) {
         return null
     }
-} */
+}
 
 // Encryption function with URL encoding
 /* export const encrypt = (text, password) => {
@@ -77,7 +77,7 @@ export const encrypt = (text, password) => {
 } */
 
 // Decryption function with URL decoding
-export const decrypt = (text, password) => {
+/* export const decrypt = (text, password) => {
     try {
         const decodedText = decodeURIComponent(text) // Decode the URL encoded encrypted string
         const decrypted = CryptoJS.AES.decrypt(decodedText, password)
@@ -85,4 +85,4 @@ export const decrypt = (text, password) => {
     } catch (e) {
         return null
     }
-}
+} */
