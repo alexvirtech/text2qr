@@ -225,7 +225,7 @@ export default function Text2QR() {
                                     Print
                                 </button>
                                 <a href={ciphertext} target="_blank" rel="noopener noreferrer" class={styles.button}>
-                                    Open
+                                    Check
                                 </a>
                                 <button type="reset" class={styles.button}>
                                     Reset
