@@ -224,6 +224,9 @@ export default function Text2QR() {
                                 <button type="button" onClick={printCanvas} class={styles.button}>
                                     Print
                                 </button>
+                                <a href={ciphertext} target="_blank" rel="noopener noreferrer" class={styles.button}>
+                                    Open
+                                </a>
                                 <button type="reset" class={styles.button}>
                                     Reset
                                 </button>
