@@ -17,7 +17,7 @@ export default function QR2Text() {
     const passwordRef = useRef(null)
 
     useEffect(() => {
-        ReactGA.initialize("G-0N9NNKXL5Y")        
+        ReactGA.initialize("G-0N9NNKXL5Y")       
     }, [])
 
     const handleDecrypted = (decryptedText) => {
