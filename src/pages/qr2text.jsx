@@ -4,6 +4,7 @@ import Context from "../utils/context"
 import { copyText } from "../utils/lib"
 import Error from "../components/error"
 import FileUploader from "../components/fileUploader"
+import ReactGA from "react-ga4"
 
 export default function QR2Text() {
     const { state, dispatch } = useContext(Context)
@@ -14,6 +15,10 @@ export default function QR2Text() {
     const [fileName, setFileName] = useState("") // Track uploaded file name
     const divRef = useRef(null)
     const passwordRef = useRef(null)
+
+    useEffect(() => {
+        ReactGA.initialize("G-0N9NNKXL5Y")        
+    }, [])
 
     const handleDecrypted = (decryptedText) => {
         setText(decryptedText) // Set the decrypted text in state
@@ -49,6 +54,10 @@ export default function QR2Text() {
     const decrypt = (e) => {
         e.preventDefault()
         dispatch({ type: "START_DECRYPT", payload: true })
+        ReactGA.event('qr_to_text_from_file', {
+            action: "decrypt",
+            page_location: window.location.href
+        })
         return false
     }
 
