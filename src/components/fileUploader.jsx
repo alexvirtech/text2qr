@@ -4,6 +4,7 @@ import { decrypt } from "../utils/crypto"
 import jsQR from "jsqr" // Import jsQR for decoding the QR code
 import Error from "./error"
 import { getHost } from "../utils/common"
+import ReactGA from "react-ga4"
 
 export default function FileUploader({ password, onDecrypted, onFileUploaded, onReset }) {
     const { state, dispatch } = useContext(Context)
@@ -11,6 +12,10 @@ export default function FileUploader({ password, onDecrypted, onFileUploaded, on
     const [error, setError] = useState("")
     const [fileData, setFileData] = useState(null) // Store file data for decryption
     const [isReadyToDecrypt, setIsReadyToDecrypt] = useState(false) // Track if file is ready for decryption
+
+    useEffect(() => {
+        ReactGA.initialize("G-0N9NNKXL5Y")       
+    }, [])
 
     useEffect(() => {
         if (state.startDec) {
@@ -60,6 +65,10 @@ export default function FileUploader({ password, onDecrypted, onFileUploaded, on
 
                     if (decryptedText) {
                         onDecrypted(decryptedText) // Pass decrypted text to the parent component
+                        ReactGA.event('qr_to_text_from_file', {
+                            action: "decrypt",
+                            page_location: window.location.href
+                        })
                     } else {
                         setError("Decryption failed. Please check the password.")
                     }
