@@ -29,7 +29,7 @@ export default function DecText() {
                 setText(txt)
                 setCreated(true)
                 ReactGA.event('decrypt_text', {
-                    action: "encrypt",
+                    action: "decrypt",
                     page_location: window.location.href
                 })
             } else {

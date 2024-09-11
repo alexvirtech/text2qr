@@ -5,8 +5,7 @@ import { copyText } from "../utils/lib"
 import { encrypt, decrypt } from "../utils/crypto"
 import Error from "../components/error"
 import { route } from "preact-router"
-//
-//import CryptoJS from "crypto-js"
+import ReactGA from "react-ga4"
 
 export default function DecScan() {
     const { state, dispatch } = useContext(Context)
@@ -18,6 +17,7 @@ export default function DecScan() {
     const [shwoReset, setShowReset] = useState(false)
 
     useEffect(() => {
+        ReactGA.initialize("G-0N9NNKXL5Y") 
         if (password.current) password.current.focus()
     }, [])
 
@@ -27,7 +27,11 @@ export default function DecScan() {
             const txt = decrypt(state.encText, password.current.value)
             if (txt) {
                 setText(txt)
-                setCreated(true)
+                setCreated(true)                
+                ReactGA.event('restore_text_from_scan', {
+                    action: "decrypt",
+                    page_location: window.location.href
+                })
                 setTimeout(() => {
                     setShowReset(true)
                 }, 5000)
