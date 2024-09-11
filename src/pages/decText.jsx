@@ -4,6 +4,7 @@ import Context from "../utils/context"
 import { copyText } from "../utils/lib"
 import { encrypt, decrypt } from "../utils/crypto"
 import Error from "../components/error"
+import ReactGA from "react-ga4"
 
 export default function DecText() {
     const { state, dispatch } = useContext(Context)
@@ -17,7 +18,7 @@ export default function DecText() {
     const password = useRef("")
 
     useEffect(() => {
-        //
+        ReactGA.initialize("G-0N9NNKXL5Y") 
     }, [])
 
     const validateAndExecute = (e) => {
@@ -27,6 +28,10 @@ export default function DecText() {
             if (txt) {
                 setText(txt)
                 setCreated(true)
+                ReactGA.event('decrypt_text', {
+                    action: "encrypt",
+                    page_location: window.location.href
+                })
             } else {
                 reset()
                 setError("Error decrypting text")

@@ -3,6 +3,7 @@ import { styles } from "../utils/styles"
 import Context from "../utils/context"
 import { copyText } from "../utils/lib"
 import { encrypt, decrypt } from "../utils/crypto"
+import ReactGA from "react-ga4"
 
 export default function EncText() {
     const { state, dispatch } = useContext(Context)
@@ -16,6 +17,7 @@ export default function EncText() {
     const repPassword = useRef("")
 
     useEffect(() => {
+        ReactGA.initialize("G-0N9NNKXL5Y") 
         setCreated(false)
         plainText.current.focus()
     }, [])
@@ -43,6 +45,10 @@ export default function EncText() {
             const ciphertext = encrypt(plainText.current.value, password.current.value)
             setCiphertext(ciphertext)
             setCreated(true)
+            ReactGA.event('encrypt_text', {
+                action: "encrypt",
+                page_location: window.location.href
+            })
         } else {
             setError("Passwords do not match")
             return
