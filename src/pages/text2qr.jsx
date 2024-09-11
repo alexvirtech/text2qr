@@ -22,7 +22,7 @@ export default function Text2QR() {
     const qrCodeRef = useRef(null)
 
     useEffect(() => {
-        ReactGA.initialize("G-SRDXBC4R7R") // Initialize Google Analytics
+        ReactGA.initialize("G-0N9NNKXL5Y") 
         setCreated(false)
         plainText.current.focus()
     }, [])
