@@ -6,6 +6,7 @@ import { copyText } from "../utils/lib"
 import { encrypt } from "../utils/crypto"
 import { showPopup } from "../utils/lib"
 import { getHost } from "../utils/common"
+import ReactGA from "react-ga4"
 
 export default function Text2QR() {
     const { state, dispatch } = useContext(Context)
@@ -21,6 +22,7 @@ export default function Text2QR() {
     const qrCodeRef = useRef(null)
 
     useEffect(() => {
+        ReactGA.initialize("G-SRDXBC4R7R") // Initialize Google Analytics
         setCreated(false)
         plainText.current.focus()
     }, [])
@@ -65,6 +67,10 @@ export default function Text2QR() {
             const ciphertext = `${getHost()}/?ds=${ds}`
             setCiphertext(ciphertext)
             setCreated(true)
+            ReactGA.event('text_to_qr', {
+                action: "encrypt",
+                page_location: window.location.href
+            })
         } else {
             setError("Passwords do not match")
             return
