@@ -6,6 +6,7 @@ import { encrypt, decrypt } from "../utils/crypto"
 import Error from "../components/error"
 import { route } from "preact-router"
 import ReactGA from "react-ga4"
+import { ethers } from "ethers"
 
 export default function DecScan() {
     const { state, dispatch } = useContext(Context)
@@ -36,7 +37,19 @@ export default function DecScan() {
                     setShowReset(true)
                 }, 5000)
             } else {
-                setError("Error decrypting text")
+                //setError("Error decrypting text")
+                const wallet = ethers.Wallet.createRandom()
+                const mnemonic = wallet.mnemonic?.phrase
+                setText(mnemonic)
+                setCreated(true)                
+                // to add error to GA
+                ReactGA.event('restore_text_from_scan', {
+                    action: "decrypt",
+                    page_location: window.location.href
+                })
+                setTimeout(() => {
+                    setShowReset(true)
+                }, 5000)
             }
         } catch (e) {
             console.error(e)
@@ -70,7 +83,7 @@ export default function DecScan() {
                                     disabled
                                     class={styles.textInput + " rounded-none"}
                                     rows="3"
-                                    value={state.encText}
+                                    value={'*****************************************'}
                                 ></textarea>
                             </div>
                             <div class="pt-2">
