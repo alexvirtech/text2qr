@@ -7,7 +7,7 @@ export default function Home() {
         return (
             <Link
                 href={item.href}
-                class="w-1/2 min-h-[120px] border border-slate-300 rounded bg-white p-4 cursor-pointer"
+                class="w-1/2 min-h-[120px] border border-slate-300 rounded bg-white p-4 cursor-pointer shadow hover:shadow-md"
             >
                 <div class="font-bold text-xl">{item.title}</div>
                 <div class="text-sm">{item.text}</div>
@@ -19,7 +19,7 @@ export default function Home() {
         <div class="w-full max-w-[800px] mx-auto px-8 py-8 ">
             <div class="tablet:flex tablet:justify-start gap-4 w-full">
                 <div class="tablet:w-1/2 p-4">
-                    <img src="./temp_pic.svg" class="max-h-[200px] w-auto mx-auto" alt="Temp picture" />
+                    <img src="./qr_logo2.png" class="max-h-[200px] w-auto mx-auto" alt="" />
                 </div>
                 <div class="grow pt-4">
                     <div class="text-2xl font-bold pb-4">
@@ -43,7 +43,7 @@ export default function Home() {
                 <ItemComponent item={items[3]} />
             </div>
             <div class="pt-4">
-                <div class="min-h-[120px] border border-slate-300 rounded bg-white p-4">
+                <div class="min-h-[120px] border border-slate-300 rounded bg-white p-4 shadow hover:shadow-md">
                     <div class="font-bold text-xl">Restore Text from Scan</div>
                     <div class="text-sm">
                         Scan a QR code with your mobile device camera to open a page. After entering the correct

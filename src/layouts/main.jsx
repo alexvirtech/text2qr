@@ -22,7 +22,7 @@ export default function Layout({ children, currentPath }) {
 
     return (
         <Context.Provider value={{ state, dispatch }}>
-            <div class={`flex flex-col ${isHomePage ? "bg-slate-200" : ""}`} style="height: calc(var(--vh) * 100)">
+            <div class={`flex flex-col ${isHomePage ? "" : ""}`} style="height: calc(var(--vh) * 100)">{/* bg-slate-200 */}
                 <Header />
                 <div class="grow pb-4">{children}</div>
                 <Footer />
